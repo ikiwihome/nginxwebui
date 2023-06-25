@@ -9,8 +9,8 @@
 set -o pipefail
 
 ## 基本信息
-repo="ikiwihome/nginxwebui"
-arch="linux/386,linux/amd64,linux/arm64,linux/arm/v7"
+repo="ikiwicc/nginxwebui"
+arch="linux/amd64"
 ver=$(cat pom.xml | grep -A1 nginxwebui | grep version | grep -oP "\d+\.\d+\.\d+")
 echo "构建镜像：$repo"
 echo "构建架构：$arch"
