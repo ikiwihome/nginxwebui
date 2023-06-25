@@ -69,9 +69,9 @@ reboot
 
 ```
 Linux: mkdir /data/nginxwebui/   
-       wget -O /data/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-3.5.8.jar
+       wget -O /data/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-3.6.0.jar
 
-Windows: Download directly from your browser http://file.nginxwebui.cn/nginxwebui-3.5.8.jar into D:/data/nginxwebui/
+Windows: Download directly from your browser http://file.nginxwebui.cn/nginxwebui-3.6.0.jar into D:/data/nginxwebui/
 ```
 
 With a new version, you just need to change the version in the path
@@ -148,7 +148,7 @@ moreover: The following configuration file is used when using docker-compose
 version: "3.2"
 services:
   nginxWebUi-server:
-    image: ikiwihome/nginxwebui:latest
+    image: ikiwicc/nginxwebui:latest
     volumes:
       - type: bind
         source: "/data/nginxwebui"

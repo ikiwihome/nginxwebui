@@ -75,9 +75,9 @@ Path : JDK安装目录\bin
 
 ```
 Linux: mkdir /data/nginxwebui/ 
-       wget -O /data/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-3.5.8.jar
+       wget -O /data/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-3.6.0.jar
 
-Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/nginxwebui-3.5.8.jar 到 D:/data/nginxwebui/nginxwebui.jar
+Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/nginxwebui-3.6.0.jar 到 D:/data/nginxwebui/nginxwebui.jar
 ```
 
 有新版本只需要修改路径中的版本即可
@@ -138,7 +138,7 @@ docker run -itd \
   -e BOOT_OPTIONS="--server.port=8080" \
   --privileged=true \
   --net=host \
-  ikiwihome/nginxwebui:latest
+  ikiwicc/nginxwebui:latest
 ```
 
 注意: 
@@ -159,7 +159,7 @@ docker run -itd \
 version: "3.2"
 services:
   nginxWebUi-server:
-    image: ikiwihome/nginxwebui:latest
+    image: ikiwicc/nginxwebui:latest
     volumes:
       - type: bind
         source: "/data/nginxwebui"
