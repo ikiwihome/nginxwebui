@@ -4,10 +4,7 @@ ENV LANG=zh_CN.UTF-8 \
     PS1="\u@\h:\w \$ "
 ENV BOOT_OPTIONS="--server.port=8080"
 ENV project.home="/data/nginxwebui/"
-ENV spring.database.type=mysql
-ENV spring.datasource.url=jdbc:mysql://172.17.0.1:63306/nginxwebui
-ENV spring.datasource.username=admin
-ENV spring.datasource.password=
+
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.cloud.tencent.com/g' /etc/apk/repositories
 RUN apk update
 RUN apk add --update --no-cache \
@@ -31,4 +28,4 @@ RUN apk add --update --no-cache \
 COPY target/nginxwebui-*.jar /data/nginxwebui/nginxwebui.jar
 COPY entrypoint.sh /entrypoint.sh
 RUN ["chmod", "+x", "/entrypoint.sh"]
-ENTRYPOINT ["tini", "entrypoint.sh"]
+ENTRYPOINT ["tini", "/entrypoint.sh"]
