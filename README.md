@@ -127,7 +127,7 @@ yum install docker
 2.拉取镜像: 
 
 ```
-docker pull ikiwihome/nginxwebui:latest
+docker pull ikiwicc/nginxwebui:latest
 ```
 
 3.启动容器: 
@@ -158,7 +158,7 @@ docker run -itd \
 ```
 version: "3.2"
 services:
-  nginxWebUi-server:
+  nginxwebui-server:
     image: ikiwicc/nginxwebui:latest
     volumes:
       - type: bind

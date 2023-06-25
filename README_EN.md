@@ -121,13 +121,13 @@ yum install docker
 2.Download images:
 
 ```
-docker pull ikiwihome/nginxwebui:latest
+docker pull ikiwicc/nginxwebui:latest
 ```
 
 3.start container
 
 ```
-docker run -itd -v /data/nginxwebui:/data/nginxwebui -e BOOT_OPTIONS="--server.port=8080" --privileged=true --net=host  ikiwihome/nginxwebui:latest
+docker run -itd -v /data/nginxwebui:/data/nginxwebui -e BOOT_OPTIONS="--server.port=8080" --privileged=true --net=host  ikiwicc/nginxwebui:latest
 ```
 
 notice: 
@@ -147,7 +147,7 @@ moreover: The following configuration file is used when using docker-compose
 ```
 version: "3.2"
 services:
-  nginxWebUi-server:
+  nginxwebui-server:
     image: ikiwicc/nginxwebui:latest
     volumes:
       - type: bind
