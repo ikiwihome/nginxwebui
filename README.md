@@ -74,10 +74,10 @@ Path : JDK安装目录\bin
 2.下载最新版发行包jar
 
 ```
-Linux: mkdir /home/nginxwebui/ 
-       wget -O /home/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-3.5.8.jar
+Linux: mkdir /data/nginxwebui/ 
+       wget -O /data/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-3.5.8.jar
 
-Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/nginxwebui-3.5.8.jar 到 D:/home/nginxwebui/nginxwebui.jar
+Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/nginxwebui-3.5.8.jar 到 D:/data/nginxwebui/nginxwebui.jar
 ```
 
 有新版本只需要修改路径中的版本即可
@@ -85,16 +85,16 @@ Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/nginxwebui-3.5.8.
 3.启动程序
 
 ```
-Linux: nohup java -jar -Dfile.encoding=UTF-8 /home/nginxwebui/nginxwebui.jar --server.port=8080 --project.home=/home/nginxwebui/ > /dev/null &
+Linux: nohup java -jar -Dfile.encoding=UTF-8 /data/nginxwebui/nginxwebui.jar --server.port=8080 --project.home=/data/nginxwebui/ > /dev/null &
 
-Windows: java -jar -Dfile.encoding=UTF-8 D:/home/nginxwebui/nginxwebui.jar --server.port=8080 --project.home=D:/home/nginxwebui/
+Windows: java -jar -Dfile.encoding=UTF-8 D:/data/nginxwebui/nginxwebui.jar --server.port=8080 --project.home=D:/data/nginxwebui/
 ```
 
 参数说明(都是非必填)
 
 --server.port 占用端口, 默认以8080端口启动
 
---project.home 项目配置文件目录，存放数据库文件，证书文件，日志等, 默认为/home/nginxwebui/
+--project.home 项目配置文件目录，存放数据库文件，证书文件，日志等, 默认为/data/nginxwebui/
 
 --spring.database.type=mysql 使用其他数据库，不填为使用本地h2数据库，可选mysql
 
@@ -134,7 +134,7 @@ docker pull ikiwihome/nginxwebui:latest
 
 ```
 docker run -itd \
-  -v /home/nginxwebui:/home/nginxwebui \
+  -v /data/nginxwebui:/data/nginxwebui \
   -e BOOT_OPTIONS="--server.port=8080" \
   --privileged=true \
   --net=host \
@@ -145,13 +145,13 @@ docker run -itd \
 
 1. 启动容器时请使用--net=host参数, 直接映射本机端口, 因为内部nginx可能使用任意一个端口, 所以必须映射本机所有端口. 
 
-2. 容器需要映射路径/home/nginxwebui:/home/nginxwebui, 此路径下存放项目所有数据文件, 包括数据库, nginx配置文件, 日志, 证书等, 升级镜像时, 此目录可保证项目数据不丢失. 请注意备份.
+2. 容器需要映射路径/data/nginxwebui:/data/nginxwebui, 此路径下存放项目所有数据文件, 包括数据库, nginx配置文件, 日志, 证书等, 升级镜像时, 此目录可保证项目数据不丢失. 请注意备份.
 
 3. -e BOOT_OPTIONS 参数可填充java启动参数, 可以靠此项参数修改端口号
 
 --server.port 占用端口, 不填默认以8080端口启动
 
-4. 日志默认存放在/home/nginxwebui/log/nginxwebui.log
+4. 日志默认存放在/data/nginxwebui/log/nginxwebui.log
 
 另: 使用docker-compose时配置文件如下
 
@@ -162,8 +162,8 @@ services:
     image: ikiwihome/nginxwebui:latest
     volumes:
       - type: bind
-        source: "/home/nginxwebui"
-        target: "/home/nginxwebui"
+        source: "/data/nginxwebui"
+        target: "/data/nginxwebui"
     environment:
       BOOT_OPTIONS: "--server.port=8080"
     privileged: true
@@ -205,8 +205,8 @@ After=network.target
 Type=simple
 User=root
 Group=root
-WorkingDirectory=/home/nginxwebui
-ExecStart=/usr/bin/java -jar -Dfile.encoding=UTF-8 /home/nginxwebui/nginxwebui.jar
+WorkingDirectory=/data/nginxwebui
+ExecStart=/usr/bin/java -jar -Dfile.encoding=UTF-8 /data/nginxwebui/nginxwebui.jar
 Restart=always
  
 [Install]
@@ -288,7 +288,7 @@ systemctl start nginxwebui.service
 2.使用找回密码参数运行nginxwebui.jar, docker用户需单独下载nginxwebui.jar运行此命令
 
 ```
-java -jar nginxwebui.jar --project.home=/home/nginxwebui/ --project.findPass=true
+java -jar nginxwebui.jar --project.home=/data/nginxwebui/ --project.findPass=true
 ```
 
 --project.home 为项目文件所在目录, 使用docker容器时为映射目录

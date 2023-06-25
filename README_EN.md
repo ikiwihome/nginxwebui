@@ -68,10 +68,10 @@ reboot
 2.Download the latest release of the distribution jar
 
 ```
-Linux: mkdir /home/nginxwebui/   
-       wget -O /home/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-3.5.8.jar
+Linux: mkdir /data/nginxwebui/   
+       wget -O /data/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-3.5.8.jar
 
-Windows: Download directly from your browser http://file.nginxwebui.cn/nginxwebui-3.5.8.jar into D:/home/nginxwebui/
+Windows: Download directly from your browser http://file.nginxwebui.cn/nginxwebui-3.5.8.jar into D:/data/nginxwebui/
 ```
 
 With a new version, you just need to change the version in the path
@@ -79,16 +79,16 @@ With a new version, you just need to change the version in the path
 3.Start program
 
 ```
-Linux: nohup java -jar -Dfile.encoding=UTF-8 /home/nginxwebui/nginxwebui.jar --server.port=8080 --project.home=/home/nginxwebui/ > /dev/null &
+Linux: nohup java -jar -Dfile.encoding=UTF-8 /data/nginxwebui/nginxwebui.jar --server.port=8080 --project.home=/data/nginxwebui/ > /dev/null &
 
-Windows: java -jar -Dfile.encoding=UTF-8 D:/home/nginxwebui/nginxwebui.jar --server.port=8080 --project.home=D:/home/nginxwebui/
+Windows: java -jar -Dfile.encoding=UTF-8 D:/data/nginxwebui/nginxwebui.jar --server.port=8080 --project.home=D:/data/nginxwebui/
 ```
 
 Parameter description (both non-required)
 
 --server.port Occupied port, default starts at port 8080
 
---project.home Project profile directory for database files, certificate files, logs, etc. Default is /home/nginxwebui/
+--project.home Project profile directory for database files, certificate files, logs, etc. Default is /data/nginxwebui/
 
 --spring.database.type=mysql Use other databases, not filled with native h2, options include mysql
 
@@ -127,20 +127,20 @@ docker pull ikiwihome/nginxwebui:latest
 3.start container
 
 ```
-docker run -itd -v /home/nginxwebui:/home/nginxwebui -e BOOT_OPTIONS="--server.port=8080" --privileged=true --net=host  ikiwihome/nginxwebui:latest
+docker run -itd -v /data/nginxwebui:/data/nginxwebui -e BOOT_OPTIONS="--server.port=8080" --privileged=true --net=host  ikiwihome/nginxwebui:latest
 ```
 
 notice: 
 
 1. When you start the container, use the --net=host parameter to map the native port directly, because internal Nginx may use any port, so you must map all the native ports. 
 
-2. Container need to map path/home/nginxwebui:/home/nginxwebui, this path for a project all data files, including database, nginx configuration files, log, certificate, etc., and updates the mirror, this directory to ensure that project data is not lost. Please note that backup.
+2. Container need to map path/data/nginxwebui:/data/nginxwebui, this path for a project all data files, including database, nginx configuration files, log, certificate, etc., and updates the mirror, this directory to ensure that project data is not lost. Please note that backup.
 
 3. -e BOOT_OPTIONS Parameter to populate the Java startup parameter, which can be used to modify the port number
 
 --server.port Occupied port, do not fill the default port 8080 startup
 
-4. Logs are stored by default /home/nginxwebui/log/nginxwebui.log
+4. Logs are stored by default /data/nginxwebui/log/nginxwebui.log
 
 moreover: The following configuration file is used when using docker-compose
 
@@ -194,8 +194,8 @@ After=network.target
 Type=simple
 User=root
 Group=root
-WorkingDirectory=/home/nginxwebui
-ExecStart=/usr/bin/java -jar -Dfile.encoding=UTF-8 /home/nginxwebui/nginxwebui.jar
+WorkingDirectory=/data/nginxwebui
+ExecStart=/usr/bin/java -jar -Dfile.encoding=UTF-8 /data/nginxwebui/nginxwebui.jar
 Restart=always
  
 [Install]
@@ -277,7 +277,7 @@ If you forget your login password or don't save the two-step verification QR cod
 2.Run the nginxwebui.jar using the retrieve password parameter. docker users need to download the nginxwebui.jar separately to run this command
 
 ```
-java -jar nginxwebui.jar --project.home=/home/nginxwebui/ --project.findPass=true
+java -jar nginxwebui.jar --project.home=/data/nginxwebui/ --project.findPass=true
 ```
 
 --project.home Project profile directory or docker mapping directory
