@@ -5,7 +5,7 @@
 #### 介绍
 nginx网页配置工具
 
-邮箱: ikiwihome@qq.com
+邮箱: ikiwicc@gmail.com
 
 官网地址: http://www.nginxwebui.cn
 

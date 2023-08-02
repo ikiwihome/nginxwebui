@@ -76,7 +76,7 @@ public class CertController extends BaseController {
 		if (type != null && type == 1) {
 			// 手动上传
 			String dir = homeConfig.home + "cert/" + cert.getDomain() + "/";
-			
+
 			if (cert.getKey().contains(FileUtil.getTmpDir().toString().replace("\\", "/"))) {
 				String keyName = new File(cert.getKey()).getName();
 				FileUtil.move(new File(cert.getKey()), new File(dir + keyName), true);
@@ -152,10 +152,10 @@ public class CertController extends BaseController {
 		}
 		isInApply = true;
 
-		String keylength = "";
+		String keylength = " --keylength 2048 "; // RSA模式
 		String ecc = "";
-		if ("ECC".equals(cert.getEncryption())) {
-			keylength = " --keylength ec-256 ";
+		if ("ECC".equals(cert.getEncryption())) { // ECC模式
+			keylength = " --keylength ec-256 "; 
 			ecc = " --ecc";
 		}
 
@@ -204,7 +204,7 @@ public class CertController extends BaseController {
 		}
 		logger.info(cmd);
 
-		rs = timeExeUtils.execCMD(cmd, env, 2 * 60 * 1000);
+		rs = timeExeUtils.execCMD(cmd, env, 5 * 60 * 1000);
 		logger.info(rs);
 
 		if (rs.contains("Your cert is in")) {
@@ -277,6 +277,9 @@ public class CertController extends BaseController {
 		if (cert.getDnsType().equals("cf")) {
 			list.add("CF_Email=" + cert.getCfEmail());
 			list.add("CF_Key=" + cert.getCfKey());
+//			list.add("CF_Token=" + cert.getCfToken());
+//			list.add("CF_Account_ID=" + cert.getCfAccountId());
+//			list.add("CF_Zone_ID=" + cert.getCfZoneId());
 		}
 		if (cert.getDnsType().equals("gd")) {
 			list.add("GD_Key=" + cert.getGdKey());
@@ -285,7 +288,6 @@ public class CertController extends BaseController {
 		if (cert.getDnsType().equals("hw")) {
 			list.add("HUAWEICLOUD_Username=" + cert.getHwUsername());
 			list.add("HUAWEICLOUD_Password=" + cert.getHwPassword());
-			list.add("HUAWEICLOUD_ProjectID=" + cert.getHwProjectId());
 			list.add("HUAWEICLOUD_DomainName=" + cert.getHwDomainName());
 		}
 
