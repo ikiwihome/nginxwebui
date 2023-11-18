@@ -76,13 +76,16 @@ public class AdminController extends BaseController {
 			}
 		}
 
-		if (admin.getAuth()) {
-			admin.setKey(authUtils.makeKey());
-		} else {
-			admin.setKey("");
-		}
-
 		adminService.addOver(admin, parentId);
+
+		return renderSuccess();
+	}
+	
+	
+	@Mapping("changePassOver")
+	public JsonResult changePassOver(Admin admin) {
+
+		adminService.changePassOver(admin);
 
 		return renderSuccess();
 	}
@@ -154,7 +157,7 @@ public class AdminController extends BaseController {
 
 	@Mapping(value = "qr")
 	public void getqcode(String url, Integer w, Integer h) throws IOException {
-		if (url != null && !"".equals(url)) {
+		if (StrUtil.isNotBlank(url)) {
 
 			if (w == null) {
 				w = 300;
