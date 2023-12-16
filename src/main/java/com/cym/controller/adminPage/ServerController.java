@@ -189,11 +189,11 @@ public class ServerController extends BaseController {
 		List<Location> list = serverService.getLocationByServerId(id);
 		for (Location location : list) {
 			String json = paramService.getJsonByTypeId(location.getId(), "location");
-			location.setLocationParamJson(json != null ? json : null);
+			location.setLocationParamJson(json);
 		}
 		serverExt.setLocationList(list);
 		String json = paramService.getJsonByTypeId(server.getId(), "server");
-		serverExt.setParamJson(json != null ? json : null);
+		serverExt.setParamJson(json);
 
 		return renderSuccess(serverExt);
 	}
@@ -204,7 +204,6 @@ public class ServerController extends BaseController {
 
 		return renderSuccess();
 	}
-
 
 	@Mapping("importServer")
 	public JsonResult importServer(String nginxPath) {
@@ -240,8 +239,17 @@ public class ServerController extends BaseController {
 				port = server.getListen();
 			}
 
-			if (TelnetUtils.isRunning(ip, Integer.parseInt(port)) && !ips.contains(server.getListen())) {
-				ips.add(server.getListen());
+			// 如果是范围端口,只检测第一个
+			if (port.contains("-")) {
+				port = port.split("-")[0];
+			}
+
+			try {
+				if (TelnetUtils.isRunning(ip, Integer.parseInt(port)) && !ips.contains(server.getListen())) {
+					ips.add(server.getListen());
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
 			}
 		}
 
@@ -280,7 +288,7 @@ public class ServerController extends BaseController {
 				if (http.getEnable() == null || !http.getEnable()) {
 					continue;
 				}
-				
+
 				NgxParam ngxParam = new NgxParam();
 				ngxParam.addValue(http.getName().trim() + " " + http.getValue().trim());
 				ngxBlock.addEntry(ngxParam);
@@ -334,11 +342,11 @@ public class ServerController extends BaseController {
 	@Mapping("upload")
 	public JsonResult upload(Context context, UploadedFile file) {
 		try {
-			File temp = new File(FileUtil.getTmpDir() + "/" + file.getName());
+			File temp = new File(FileUtil.getTmpDir() + File.separator + file.getName().replace("..", ""));
 			file.transferTo(temp);
 
 			// 移动文件
-			File dest = new File(homeConfig.home + "cert/" + file.getName());
+			File dest = new File(homeConfig.home + "cert/" + file.getName().replace("..", ""));
 			while (FileUtil.exist(dest)) {
 				dest = new File(dest.getPath() + "_1");
 			}

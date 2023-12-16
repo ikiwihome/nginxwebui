@@ -3,7 +3,8 @@ package com.cym.controller.adminPage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.cert.CertificateException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -71,12 +72,12 @@ public class CertController extends BaseController {
 
 	@Mapping("addOver")
 	public JsonResult addOver(Cert cert, String[] domains, String[] types, String[] values) {
-		
+
 		// 检查是否重名
-		if(certService.hasName(cert)) {
-			return renderError(m.get("certStr.nameRepetition")); 
+		if (certService.hasName(cert)) {
+			return renderError(m.get("certStr.nameRepetition"));
 		}
-		
+
 		Integer type = cert.getType();
 		if (type == null && StrUtil.isNotEmpty(cert.getId())) {
 			Cert certOrg = sqlHelper.findById(cert.getId(), Cert.class);
@@ -92,6 +93,11 @@ public class CertController extends BaseController {
 		if (type != null && type == 1) {
 			// 手动上传
 			String dir = homeConfig.home + "cert/" + domain + "/";
+
+			// windows下不允许*作为文件路径
+			if (SystemTool.isWindows()) { 
+				dir = dir.replace("*", "_");
+			}
 
 			if (cert.getKey().contains(FileUtil.getTmpDir().toString().replace("\\", "/"))) {
 				String keyName = new File(cert.getKey()).getName();
@@ -174,9 +180,9 @@ public class CertController extends BaseController {
 
 		Cert cert = sqlHelper.findById(id, Cert.class);
 
-		if (cert.getDnsType() == null) {
-			return renderError(m.get("certStr.error3"));
-		}
+//		if (cert.getDnsType() == null) {
+//			return renderError(m.get("certStr.error3"));
+//		}
 
 		if (isInApply) {
 			return renderError(m.get("certStr.error4"));
@@ -372,7 +378,7 @@ public class CertController extends BaseController {
 			ZipUtil.zip(dir);
 			FileUtil.del(dir);
 
-			DownloadedFile downloadedFile = new DownloadedFile("application/octet-stream", new FileInputStream(dir + ".zip"), "cert.zip");
+			DownloadedFile downloadedFile = new DownloadedFile("application/octet-stream", Files.newInputStream(Paths.get(dir + ".zip")), "cert.zip");
 			return downloadedFile;
 		}
 
