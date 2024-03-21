@@ -48,17 +48,26 @@ public class Cert extends BaseModel {
 	@InitValue("0")
 	Integer autoRenew; 
 	/**
-	 * dns提供商 ali:阿里云  dp:腾讯云  cf:Cloudflare  gd:Godaddy   hw:华为云
+	 * dns提供商 ali:阿里云  dp:dnsPod  cf:Cloudflare  gd:Godaddy   hw:华为云 tencent:腾讯云 aws:亚马逊云 ipv64:IPv64
 	 */
 	String dnsType; 
 	/**
-	 * dpId(腾讯云需要的参数)
+	 * dpId(dnsPod需要的参数)
 	 */
 	String dpId;
 	/**
-	 * dpKey(腾讯云需要的参数)
+	 * dpKey(dnsPod需要的参数)
 	 */
 	String dpKey;
+	
+	/**
+	 * tencentSecretId(腾讯云需要的参数)
+	 */
+	String tencentSecretId;
+	/**
+	 * tencentSecretKey(腾讯云需要的参数)
+	 */
+	String tencentSecretKey;
 	/**
 	 * aliKey(阿里云需要的参数)
 	 */
@@ -97,7 +106,47 @@ public class Cert extends BaseModel {
 	 */
 	String hwDomainName;
 	
+	/**
+	 * AWS_ACCESS_KEY_ID(亚马逊云需要的参数)
+	 */
+	String awsAccessKeyId;
+	/**
+	 * AWS_SECRET_ACCESS_KEY(亚马逊云需要的参数)
+	 */
+	String awsSecretAccessKey;
 	
+	/**
+	 * IPv64_Token(IPv64需要的参数)
+	 */
+	String ipv64Token;
+	
+	
+	
+
+	public String getIpv64Token() {
+		return ipv64Token;
+	}
+
+	public void setIpv64Token(String ipv64Token) {
+		this.ipv64Token = ipv64Token;
+	}
+
+	public String getAwsAccessKeyId() {
+		return awsAccessKeyId;
+	}
+
+	public void setAwsAccessKeyId(String awsAccessKeyId) {
+		this.awsAccessKeyId = awsAccessKeyId;
+	}
+
+	public String getAwsSecretAccessKey() {
+		return awsSecretAccessKey;
+	}
+
+	public void setAwsSecretAccessKey(String awsSecretAccessKey) {
+		this.awsSecretAccessKey = awsSecretAccessKey;
+	}
+
 	public String getHwDomainName() {
 		return hwDomainName;
 	}
@@ -281,6 +330,22 @@ public class Cert extends BaseModel {
 
 	public void setKey(String key) {
 		this.key = key;
+	}
+
+	public String getTencentSecretId() {
+		return tencentSecretId;
+	}
+
+	public void setTencentSecretId(String tencentSecretId) {
+		this.tencentSecretId = tencentSecretId;
+	}
+
+	public String getTencentSecretKey() {
+		return tencentSecretKey;
+	}
+
+	public void setTencentSecretKey(String tencentSecretKey) {
+		this.tencentSecretKey = tencentSecretKey;
 	}
 
 

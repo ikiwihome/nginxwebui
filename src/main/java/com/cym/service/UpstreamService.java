@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Inject;
-import org.noear.solon.aspect.annotation.Service;
 
 import com.cym.model.Param;
 import com.cym.model.Upstream;
@@ -21,7 +21,7 @@ import com.cym.sqlhelper.utils.SqlHelper;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 
-@Service
+@Component
 public class UpstreamService {
 	@Inject
 	SqlHelper sqlHelper;
@@ -40,8 +40,10 @@ public class UpstreamService {
 
 	
 	public void deleteById(String id) {
-		sqlHelper.deleteById(id, Upstream.class);
-		sqlHelper.deleteByQuery(new ConditionAndWrapper().eq("upstreamId", id), UpstreamServer.class);
+		String[] ids = id.split(",");
+		
+		sqlHelper.deleteByIds(ids, Upstream.class);
+		sqlHelper.deleteByQuery(new ConditionAndWrapper().in("upstreamId", ids), UpstreamServer.class);
 	}
 
 	

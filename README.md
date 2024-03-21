@@ -75,9 +75,9 @@ Path : JDK安装目录\bin
 
 ```
 Linux: mkdir /data/nginxwebui/ 
-       wget -O /data/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-3.8.2.jar
+       wget -O /data/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-3.9.5.jar
 
-Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/nginxwebui-3.8.2.jar 到 D:/data/nginxwebui/nginxwebui.jar
+Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/nginxwebui-3.9.5.jar 到 D:/data/nginxwebui/nginxwebui.jar
 ```
 
 有新版本只需要修改路径中的版本即可

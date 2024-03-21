@@ -3,8 +3,8 @@ package com.cym.service;
 import java.io.File;
 import java.util.List;
 
+import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Inject;
-import org.noear.solon.aspect.annotation.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +20,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
 
-@Service
+@Component
 public class CertService {
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -91,19 +91,48 @@ public class CertService {
 	}
 
 	public String getAcmeZipBase64() {
-		File file = ZipUtil.zip(homeConfig.home + ".acme.sh", homeConfig.home + "temp" + File.separator + "cert.zip");
-		String str = Base64.encode(file);
-		file.delete();
-		return str;
+		try {
+			File file = ZipUtil.zip(homeConfig.home + ".acme.sh", homeConfig.home + "temp" + File.separator + "acme.zip");
+			String str = Base64.encode(file);
+			file.delete();
+			return str;
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
+	}
+	
+	public String getCertZipBase64() {
+		try {
+			File file = ZipUtil.zip(homeConfig.home + "cert", homeConfig.home + "temp" + File.separator + "cert.zip");
+			String str = Base64.encode(file);
+			file.delete();
+			return str;
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
 	}
 
 	public void writeAcmeZipBase64(String acmeZip) {
+		if (StrUtil.isNotEmpty(acmeZip)) {
+			Base64.decodeToFile(acmeZip, new File(homeConfig.home + "temp" + File.separator + "acme.zip"));
+			FileUtil.del(homeConfig.home + ".acme.sh/");
+			FileUtil.mkdir(homeConfig.home + ".acme.sh/");
+			ZipUtil.unzip(homeConfig.home + "temp" + File.separator + "acme.zip", homeConfig.home + ".acme.sh/");
+			FileUtil.del(homeConfig.home + "temp" + File.separator + "acme.zip");
+		}
+	}
+	
 
-		Base64.decodeToFile(acmeZip, new File(homeConfig.home + "acme.zip"));
-		FileUtil.mkdir(homeConfig.acmeShDir);
-		ZipUtil.unzip(homeConfig.home + "acme.zip", homeConfig.acmeShDir);
-		FileUtil.del(homeConfig.home + "acme.zip");
-
+	public void writeCertZipBase64(String certZip) {
+		if (StrUtil.isNotEmpty(certZip)) {
+			Base64.decodeToFile(certZip, new File(homeConfig.home + "temp" + File.separator + "cert.zip"));
+			FileUtil.del(homeConfig.home + "cert/");
+			FileUtil.mkdir(homeConfig.home + "cert/");
+			ZipUtil.unzip(homeConfig.home + "temp" + File.separator + "cert.zip", homeConfig.home + "cert/");
+			FileUtil.del(homeConfig.home + "temp" + File.separator + "cert.zip");
+		}
 	}
 
 	public boolean hasName(Cert cert) {
@@ -118,8 +147,11 @@ public class CertService {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
+
+
+	
 
 }

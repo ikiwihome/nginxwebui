@@ -11,6 +11,8 @@ RUN apk add --update --no-cache \
        nginx \
        nginx-mod-stream \
        nginx-mod-http-headers-more \
+       nginx-mod-http-lua \
+       nginx-mod-http-brotli \
        openjdk8-jre \
        net-tools \
        nano \

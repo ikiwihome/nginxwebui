@@ -81,6 +81,16 @@ $(function() {
 	form.on('select(type)', function(data) {
 		checkType(data.value);
 	});
+	
+	form.on('checkbox(checkAll)', function(data) {
+		if (data.elem.checked) {
+			$("input[name='ids']").prop("checked", true)
+		} else {
+			$("input[name='ids']").prop("checked", false)
+		}
+
+		form.render();
+	});	
 })
 
 function search() {
@@ -90,10 +100,13 @@ function search() {
 function checkDnsType(value) {
 	$("#ali").hide();
 	$("#dp").hide();
+	$("#tencent").hide();
+	$("#aws").hide();
 	$("#cf").hide();
 	$("#gd").hide();
 	$("#hw").hide();
-
+	$("#ipv64").hide();
+	
 	$("#" + value).show();
 }
 
@@ -125,11 +138,16 @@ function add() {
 	$("#aliSecret").val("");
 	$("#dpId").val("");
 	$("#dpKey").val("");
+	$("#tencentSecretId").val("");
+	$("#tencentSecretKey").val("");
+	$("#awsAccessKeyId").val("");
+	$("#awsSecretAccessKey").val("");
 	$("#cfEmail").val("");
 	$("#cfKey").val("");
 	$("#gdKey").val("");
 	$("#gdSecret").val("");
-
+	$("#ipv64Token").val("");
+	
 	$("#hwUsername").val("");
 	$("#hwPassword").val("");
 	$("#hwDomainName").val("");
@@ -181,12 +199,17 @@ function edit(id, clone) {
 				$("#aliSecret").val(cert.aliSecret);
 				$("#dpId").val(cert.dpId);
 				$("#dpKey").val(cert.dpKey);
+				$("#tencentSecretId").val(cert.tencentSecretId);
+				$("#tencentSecretKey").val(cert.tencentSecretKey);
+				$("#awsAccessKeyId").val(cert.awsAccessKeyId);
+				$("#awsSecretAccessKey").val(cert.awsSecretAccessKey);
 				$("#cfEmail").val(cert.cfEmail);
 				$("#cfKey").val(cert.cfKey);
 
 				$("#gdKey").val(cert.gdKey);
 				$("#gdSecret").val(cert.gdSecret);
-
+				$("#ipv64Token").val(cert.ipv64Token);
+				
 				$("#hwUsername").val(cert.hwUsername);
 				$("#hwPassword").val(cert.hwPassword);
 				$("#hwDomainName").val(cert.hwDomainName);
@@ -297,6 +320,18 @@ function addOver() {
 				return;
 			}
 		}
+		if ($("#dnsType").val() == 'aws') {
+			if ($("#awsAccessKeyId").val() == '' || $("#awsSecretAccessKey").val() == '') {
+				layer.msg(commonStr.IncompleteEntry);
+				return;
+			}
+		}
+		if ($("#dnsType").val() == 'ipv64') {
+			if ($("#ipv64Token").val() == '') {
+				layer.msg(commonStr.IncompleteEntry);
+				return;
+			}
+		}
 	}
 
 	if ($("#type").val() == 1 && $("#pem").val() == $("#key").val()) {
@@ -355,6 +390,43 @@ function del(id) {
 	}
 }
 
+
+
+function delMany() {
+	if (confirm(commonStr.confirmDel)) {
+		var ids = [];
+
+		$("input[name='ids']").each(function() {
+			if ($(this).prop("checked")) {
+				ids.push($(this).val());
+			}
+		})
+
+		if (ids.length == 0) {
+			layer.msg(commonStr.unselected);
+			return;
+		}
+
+		$.ajax({
+			type: 'POST',
+			url : ctx + '/adminPage/cert/del',
+			data: {
+				id: ids.join(",")
+			},
+			dataType: 'json',
+			success: function(data) {
+				if (data.success) {
+					location.reload();
+				} else {
+					layer.msg(data.msg)
+				}
+			},
+			error: function() {
+				layer.alert("请求失败，请刷新重试");
+			}
+		});
+	}
+}
 
 function issue(id) {
 

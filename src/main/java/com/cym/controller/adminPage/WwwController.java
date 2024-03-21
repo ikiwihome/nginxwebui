@@ -43,7 +43,7 @@ public class WwwController extends BaseController {
 		}
 
 		try {
-			FileUtil.clean(www.getDir());
+//			FileUtil.clean(www.getDir());  //太危险不要删了文件夹了 
 
 			try {
 				ZipUtil.unzip(dirTemp, www.getDir());
@@ -63,10 +63,21 @@ public class WwwController extends BaseController {
 
 		return renderError(m.get("wwwStr.zipError"));
 	}
+	
+	@Mapping("clean")
+	public JsonResult clean(String id) {
+		Www www = sqlHelper.findById(id, Www.class);
+		
+		FileUtil.clean(www.getDir());
+		
+		return renderSuccess();
+	}
 
 	@Mapping("del")
 	public JsonResult del(String id) {
-		sqlHelper.deleteById(id, Www.class);
+		String[] ids = id.split(",");
+		
+		sqlHelper.deleteByIds(ids, Www.class);
 
 		return renderSuccess();
 	}

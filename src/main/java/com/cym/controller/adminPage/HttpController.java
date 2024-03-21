@@ -58,7 +58,8 @@ public class HttpController extends BaseController {
 
 	@Mapping("del")
 	public JsonResult del(String id) {
-		sqlHelper.deleteById(id, Http.class);
+		String[] ids = id.split(",");		
+		sqlHelper.deleteByIds(ids, Http.class);
 
 		return renderSuccess();
 	}
@@ -88,7 +89,7 @@ public class HttpController extends BaseController {
 			http.setName("map");
 			http.setValue("$http_upgrade $connection_upgrade {\r\n" //
 					+ "    default upgrade;\r\n" //
-					+ "    '' close;\r\n" + "}\r\n" + "");//
+					+ "    '' close;\r\n" + "}\r\n");//
 			http.setUnit("");
 			https.add(http);
 		}
