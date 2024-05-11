@@ -197,15 +197,15 @@
                     </li>
                 </ul>
             </li>
-            <li class="open"><a class="dd" href="TokenController.html#header">8.&nbsp;获取token</a>
-                <ul class="sectlevel2" style="display: block">
+            <li class=""><a class="dd" href="TokenController.html#header">8.&nbsp;获取token</a>
+                <ul class="sectlevel2" style="display: none">
                     <li><a
                             href="TokenController.html#_8_1_获取Token">8.1.&nbsp;获取Token</a>
                     </li>
                 </ul>
             </li>
-            <li class=""><a class="dd" href="UploadController.html#header">9.&nbsp;文件上传接口</a>
-                <ul class="sectlevel2" style="display: none">
+            <li class="open"><a class="dd" href="UploadController.html#header">9.&nbsp;文件上传接口</a>
+                <ul class="sectlevel2" style="display: block">
                     <li><a
                             href="UploadController.html#_9_1_文件上传">9.1.&nbsp;文件上传</a>
                     </li>
@@ -238,18 +238,19 @@
     </div>
 </div>
 <div id="content">
-    <div class="sect1"><h2 id="_获取token"><a class="anchor" href="#_获取token"></a><a class="link" href="#_获取token">8.&nbsp;获取token</a>
+    <div class="sect1"><h2 id="_文件上传接口"><a class="anchor" href="#_文件上传接口"></a><a class="link" href="#_文件上传接口">9.&nbsp;文件上传接口</a>
     </h2>
         <div class="sectionbody">
-            <div class="sect2"><h3 id="_8_1_获取Token">
-                <a class="anchor" href="#_8_1_获取Token"></a>
-                <a class="link" href="#_8_1_获取Token">8.1.&nbsp;获取Token</a>
+            <div class="sect2"><h3 id="_9_1_文件上传">
+                <a class="anchor" href="#_9_1_文件上传"></a>
+                <a class="link" href="#_9_1_文件上传">9.1.&nbsp;文件上传</a>
             </h3>
-                <div class="paragraph"><p><strong>URL:</strong><a href="/token/getToken" class="bare">&nbsp;/token/getToken</a>
+                <div class="paragraph"><p><strong>URL:</strong><a href="/api/upload/upload" class="bare">&nbsp;/api/upload/upload</a>
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
-                <div class="paragraph"><p><strong>Description:</strong>&nbsp;其他接口调用需要在http请求header中添加token, 其中token的获取需要先在管理员管理中, 打开用户的接口调用权限,<br/>         然后通过用户名密码调用获取token接口, 才能得到token</p></div>
+                <div class="paragraph"><p><strong>Author:</strong>&nbsp;CYM</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;multipart/form-data</p></div>
+                <div class="paragraph"><p><strong>Description:</strong>&nbsp;文件上传</p></div>
                 <div class="paragraph"><p><strong>Query-parameters:</strong></p></div>
                 <table class="tableblock frame-all grid-all spread">
                     <colgroup>
@@ -270,17 +271,9 @@
                     </thead>
                     <tbody>
                     <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">用户名</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">pass</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">密码</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">file</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">file</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">No comments found.</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
                     </tr>
@@ -289,7 +282,7 @@
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /token/getToken?pass=&name=</code></pre>
+                        <pre><code class="bash">curl -X GET -H 'Content-Type: multipart/form-data' -i /api/upload/upload</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-fields:</strong></p></div>

@@ -93,10 +93,6 @@
 	padding-bottom: 0px !important;
 	height: 110px;
 }
-
-.layui-form-item .layui-form-checkbox[lay-skin=primary] {
-
-}
 </style>
 </head>
 <body class="layui-layout-body">
@@ -208,7 +204,7 @@
 										<span class="blk">${serverStr.http2}：</span> 
 										<span class="descr">
 										<#if ext.server.http2==0>${commonStr.no}</#if> 
-										<#if ext.server.http2==1>${commonStr.yes}</#if> 
+										<#if ext.server.http2==1 || ext.server.http2==2>${commonStr.yes}</#if> 
 										</span>
 									</#if>
 								</td>
@@ -286,7 +282,7 @@
 							</div>
 
 
-							<div class="layui-form-item">
+							<div class="layui-form-item" style="margin-bottom: 0px;">
 								<label class="layui-form-label">
 									${serverStr.listen}
 									<span class="red">*</span>
@@ -294,11 +290,13 @@
 								<div class="layui-input-inline">
 									<input type="text" name="ip" id="ip" class="layui-input" style="width: 125px; display: inline-block;" placeholder="${serverStr.ipDefault}">
 									<input type="text" name="listen" id="listen" style="width: 60px; display: inline-block;" class="layui-input" placeholder="${serverStr.port}">
-									<div class="layui-input-inline" style="width: 250px;">
-									<input type="checkbox" name="def" id="def" title="default" lay-skin="primary">
-									<input type="checkbox" name="proxyProtocol" id="proxyProtocol" title="proxy protocol" lay-skin="primary">
-									</div>
 								</div>
+							</div>
+							
+							<div class="layui-form-item" style="padding-left: 20px;">
+								<input type="checkbox" name="def" id="def" title="default" lay-skin="primary">
+								<input type="checkbox" name="proxyProtocol" id="proxyProtocol" title="proxy protocol" lay-skin="primary">
+								<input type="checkbox" name="ipv6" id="ipv6" title="${serverStr.ipv6}" lay-skin="primary" >
 							</div>
 
 						
@@ -387,9 +385,10 @@
 							<div class="layui-form-item">
 
 								<label class="layui-form-label">${serverStr.http2}</label>
-								<div class="layui-input-inline" style="width: 100px;">
-									<select name="http2" id="http2">
-										<option value="1">${commonStr.yes}</option>
+								<div class="layui-input-inline" style="width: 250px;">
+									<select name="http2" id="http2" >
+										<option value="2">${commonStr.yes} (${serverStr.http2New})</option>
+										<option value="1">${commonStr.yes} (${serverStr.http2Old})</option>
 										<option value="0">${commonStr.no}</option>
 									</select>
 								</div>
@@ -431,8 +430,14 @@
 				<div class="layui-form-item">
 					<button type="button" class="layui-btn layui-btn-sm layui-btn-normal proxyHttp" style="margin-left: 50px;" onclick="addItem()">${serverStr.addLocation}</button>
 					
+					<button type="button" class="layui-btn layui-btn-sm layui-btn-normal proxyHttp"  onclick="setDenyAllow()">${serverStr.ipDenyAllow}</button>
+					
 					<button type="button" class="layui-btn layui-btn-sm"  onclick="serverParam()">${serverStr.extParm}</button>
 					<textarea style="display: none;" id="serverParamJson" name="serverParamJson"></textarea>
+					
+					<input type="hidden" id="denyAllow" name="denyAllow">
+					<input type="hidden" id="denyId" name="denyId">
+					<input type="hidden" id="allowId" name="allowId">
 				</div>
 				
 							
@@ -569,6 +574,49 @@
 			<div class="layui-form-item center">
 				<button type="button" class="layui-btn layui-btn-normal" onclick="editDescrOver()">${commonStr.ok}</button>
 				<button type="button" class="layui-btn" onclick="layer.closeAll()">${commonStr.close}</button>
+			</div>
+		</div>
+		
+		
+		<div class="layui-form" id="denyAllowDiv" style="padding: 15px; display: none">
+			<div class="layui-form-item">
+				<label class="layui-form-label">${serverStr.denyAllowModel}</label>
+				<div class="layui-input-inline" style="width: 250px;">
+					<select id="denyAllowValue" lay-filter="denyAllowValue">
+						<option value="0">${serverStr.normalMode}</option>
+						<option value="1">${serverStr.blackMode}</option>
+						<option value="2">${serverStr.whiteMode}</option>
+						<option value="3">${serverStr.blackWhiteMode}</option>
+					</select>
+				</div>
+			</div>
+			
+			<div class="layui-form-item" id="denyDiv">
+				<label class="layui-form-label">${serverStr.blacklist}</label>
+				<div class="layui-input-block">
+					<select id="denyIdValue">
+						<#list denyAllowList as denyAllow>
+						<option value="${denyAllow.id}">${denyAllow.name}</option>
+						</#list>
+					</select>
+				</div>
+			</div>
+			
+			<div class="layui-form-item" id="allowDiv">
+				<label class="layui-form-label">${serverStr.whitelist}</label>
+				<div class="layui-input-block">
+					<select id="allowIdValue">
+						<#list denyAllowList as denyAllow>
+						<option value="${denyAllow.id}">${denyAllow.name}</option>
+						</#list>
+					</select>
+				</div>
+			</div>
+			
+			
+			<div class="layui-form-item center">
+				<button type="button" class="layui-btn layui-btn-normal" onclick="setDenyAllowOver()">${commonStr.ok}</button>
+				<button type="button" class="layui-btn" onclick="layer.close(denyAllowIndex)">${commonStr.close}</button>
 			</div>
 		</div>
 		

@@ -94,6 +94,7 @@ $(function() {
 })
 
 function search() {
+	$("input[name='curr']").val(1);
 	$("#searchForm").submit();
 }
 
@@ -166,7 +167,7 @@ function add() {
 	$("#makeTime").val("");
 	$("#endTime").val("");
 
-	checkType(0);
+	checkType(2);
 	checkDnsType('ali');
 
 	form.render();
@@ -571,9 +572,9 @@ function getTxtValue(id) {
 						var map = data.obj[i]
 						html += `
 						<tr>
-							<td>${map.domain} <input type="hidden" name="domains" value="${map.domain}"> </td>
-							<td>${map.type} <input type="hidden" name="types" value="${map.type}"> </td>
-							<td>${map.value} <input type="hidden" name="values" value="${map.value}"> </td>
+							<td>${map.domain}</td>
+							<td>${map.type}</td>
+							<td>${map.value}</td>
 						</tr>
 					`;
 					}

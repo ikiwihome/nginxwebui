@@ -31,7 +31,10 @@ $(function() {
 	form.on('select(rewrite)', function(data) {
 		checkRewrite(data.value);
 	});
-	
+	form.on('select(denyAllowValue)', function(data) {
+		checkDenyAllow(data.value);
+	});
+
 	form.on('checkbox(checkAll)', function(data) {
 		if (data.elem.checked) {
 			$("input[name='ids']").prop("checked", true)
@@ -40,7 +43,7 @@ $(function() {
 		}
 
 		form.render();
-	});	
+	});
 
 	layui.use('upload', function() {
 		var upload = layui.upload;
@@ -86,6 +89,7 @@ function checkType(type, id) {
 		$("#" + id + " span[name='upstreamSelectSpan']").hide();
 		$("#" + id + " span[name='blankSpan']").hide();
 		$("#" + id + " span[name='headerSpan']").show();
+		$("#" + id + " span[name='returnSpan']").hide();
 	}
 	if (type == 1) {
 		$("#" + id + " span[name='valueSpan']").hide();
@@ -93,6 +97,7 @@ function checkType(type, id) {
 		$("#" + id + " span[name='upstreamSelectSpan']").hide();
 		$("#" + id + " span[name='blankSpan']").hide();
 		$("#" + id + " span[name='headerSpan']").hide();
+		$("#" + id + " span[name='returnSpan']").hide();
 	}
 	if (type == 2) {
 		$("#" + id + " span[name='valueSpan']").hide();
@@ -100,6 +105,7 @@ function checkType(type, id) {
 		$("#" + id + " span[name='upstreamSelectSpan']").show();
 		$("#" + id + " span[name='blankSpan']").hide();
 		$("#" + id + " span[name='headerSpan']").show();
+		$("#" + id + " span[name='returnSpan']").hide();
 	}
 	if (type == 3) {
 		$("#" + id + " span[name='valueSpan']").hide();
@@ -107,6 +113,15 @@ function checkType(type, id) {
 		$("#" + id + " span[name='upstreamSelectSpan']").hide();
 		$("#" + id + " span[name='blankSpan']").show();
 		$("#" + id + " span[name='headerSpan']").hide();
+		$("#" + id + " span[name='returnSpan']").hide();
+	}
+	if (type == 4) {
+		$("#" + id + " span[name='valueSpan']").hide();
+		$("#" + id + " span[name='rootPathSpan']").hide();
+		$("#" + id + " span[name='upstreamSelectSpan']").hide();
+		$("#" + id + " span[name='blankSpan']").hide();
+		$("#" + id + " span[name='headerSpan']").hide();
+		$("#" + id + " span[name='returnSpan']").show();
 	}
 }
 
@@ -129,7 +144,6 @@ function checkProxyType(value) {
 		$(".proxyHttp").hide();
 		$(".proxyTcp").show();
 	}
-
 }
 
 function checkRewrite(value) {
@@ -142,7 +156,24 @@ function checkRewrite(value) {
 	}
 }
 
+function checkDenyAllow(value) {
+	$("#denyDiv").hide();
+	$("#allowDiv").hide();
+
+	if (value == 1) {
+		$("#denyDiv").show();
+	}
+	if (value == 2) {
+		$("#allowDiv").show();
+	}
+	if (value == 3) {
+		$("#denyDiv").show();
+		$("#allowDiv").show();
+	}
+}
+
 function search() {
+	$("input[name='curr']").val(1);
 	$("#searchForm").submit();
 }
 
@@ -150,6 +181,7 @@ function add() {
 	$("#id").val("");
 	$("#listen").val("");
 	$("#def").prop("checked", false);
+	$("#ipv6").prop("checked", false);
 	$("#proxyProtocol").prop("checked", false);
 	$("#ip").val("");
 	$("#serverName").val("");
@@ -169,6 +201,10 @@ function add() {
 	$("#itemList").html("");
 	$("#paramJson").val("");
 
+	$("#denyAllow").val("0");
+	$("#denyId option:first").prop("selected", true);
+	$("#allowId option:first").prop("selected", true);
+
 	$(".protocols").prop("checked", true);
 
 	checkProxyType(0);
@@ -180,15 +216,15 @@ function add() {
 }
 
 function showWindow(title) {
-	
+
 	var width = "1350px";
 	var height = "90%";
-	if(window.innerWidth <= 1000){
+	if (window.innerWidth <= 1000) {
 		// 手机端
 		width = "1000px";
 		height = "1500px";
 	}
-	
+
 	layer.open({
 		type: 1,
 		title: title,
@@ -251,6 +287,7 @@ function addOver() {
 
 	server.proxyProtocol = $("#proxyProtocol").prop("checked") ? "1" : "0";
 	server.def = $("#def").prop("checked") ? "1" : "0";
+	server.ipv6 = $("#ipv6").prop("checked") ? "1" : "0";
 	server.serverName = $("#serverName").val();
 	server.ssl = $("#ssl").val();
 	server.pem = $("#pem").val();
@@ -267,7 +304,6 @@ function addOver() {
 		}
 	}
 	server.http2 = $("#http2").val();
-	//debugger
 	server.passwordId = $("#passwordId").val();
 
 	var protocols = [];
@@ -278,6 +314,9 @@ function addOver() {
 	});
 	server.protocols = protocols.join(" ");
 
+	server.denyAllow = $("#denyAllow").val();
+	server.denyId = $("#denyId").val();
+	server.allowId = $("#allowId").val();
 
 	var serverParamJson = $("#serverParamJson").val();
 
@@ -299,6 +338,7 @@ function addOver() {
 		location.websocket = $(this).find("input[name='websocket']").prop("checked") ? 1 : 0;
 		location.cros = $(this).find("input[name='cros']").prop("checked") ? 1 : 0;
 		location.headerHost = $(this).find("select[name='headerHost']").val();
+		location.returnUrl = $(this).find("input[name='returnUrl']").val();
 		
 		locations.push(location);
 	})
@@ -367,6 +407,7 @@ function edit(id, clone) {
 
 				$("#def").prop("checked", server.def == 1);
 				$("#proxyProtocol").prop("checked", server.proxyProtocol == 1);
+				$("#ipv6").prop("checked", server.ipv6 == 1);
 				$("#serverName").val(server.serverName);
 				$("#ssl").val(server.ssl);
 				$("#pem").val(server.pem);
@@ -377,6 +418,9 @@ function edit(id, clone) {
 				$("#proxyType").val(server.proxyType);
 				$("#proxyUpstreamId").val(server.proxyUpstreamId);
 				$("#serverParamJson").val(data.obj.paramJson);
+				$("#denyAllow").val(server.denyAllow);
+				$("#denyId").val(server.denyId);
+				$("#allowId").val(server.allowId);
 				$("#passwordId").val(server.passwordId);
 
 
@@ -438,7 +482,8 @@ function edit(id, clone) {
 					$("#" + uuid + " select[name='upstreamId']").val(location.upstreamId);
 					$("#" + uuid + " input[name='upstreamPath']").val(location.upstreamPath);
 					$("#" + uuid + " select[name='headerHost']").val(location.headerHost);
-
+					$("#" + uuid + " input[name='returnUrl']").val(location.returnUrl);
+					
 					if (location.header == 1) {
 						$("#" + uuid + " input[name='header']").prop("checked", true);
 					} else {
@@ -456,7 +501,7 @@ function edit(id, clone) {
 					} else {
 						$("#" + uuid + " input[name='cros']").prop("checked", false);
 					}
-					
+
 					checkType(location.type, uuid)
 				}
 
@@ -515,7 +560,7 @@ function delMany() {
 
 		$.ajax({
 			type: 'POST',
-			url : ctx + '/adminPage/server/del',
+			url: ctx + '/adminPage/server/del',
 			data: {
 				id: ids.join(",")
 			},
@@ -572,6 +617,7 @@ function buildHtml(uuid, location, upstreamSelect) {
 							<option ${location.type == '0' ? 'selected' : ''} value="0">${serverStr.serverType0}</option>
 							<option ${location.type == '1' ? 'selected' : ''} value="1">${serverStr.serverType1}</option>
 							<option ${location.type == '2' ? 'selected' : ''} value="2">${serverStr.serverType2}</option>
+							<option ${location.type == '4' ? 'selected' : ''} value="4">${serverStr.serverType4}</option>
 							<option ${location.type == '3' ? 'selected' : ''} value="3">${serverStr.serverType3}</option>
 						</select>
 					</div>
@@ -613,7 +659,7 @@ function buildHtml(uuid, location, upstreamSelect) {
 					
 					</span>
 					
-					<span  name="headerSpan" style="padding-left:7px;">
+					<span name="headerSpan" style="padding-left:7px;">
 						<div class="layui-inline">
 							<input type="checkbox" name="websocket" title="${serverStr.websocket}" lay-skin="primary"> 
 						</div>
@@ -631,6 +677,12 @@ function buildHtml(uuid, location, upstreamSelect) {
 								<option ${location.headerHost == '$host:$server_port' ? 'selected' : ''}>$host:$server_port</option>
 								
 							</select>
+						</div>
+					</span>
+					
+					<span name="returnSpan">
+						<div class="layui-inline">
+							<input type="text"  style="width: 277px;" name="returnUrl" id="returnUrl_${uuid}" class="layui-input long" value=""  placeholder="${serverStr.example}：https://www.baidu.com">
 						</div>
 					</span>
 				</td> 
@@ -725,11 +777,48 @@ function serverParam() {
 
 }
 
+
 function locationParam(uuid) {
 	var json = $("#locationParamJson_" + uuid).val();
 	$("#targertId").val("locationParamJson_" + uuid);
 	var params = json != '' ? JSON.parse(json) : [];
 	fillTable(params);
+}
+
+var denyAllowIndex;
+function setDenyAllow() {
+	var denyAllow = $("#denyAllow").val();
+	var denyId = $("#denyId").val();
+	var allowId = $("#allowId").val();
+
+	$("#denyAllowValue").val(denyAllow);
+	if (denyId != null) {
+		$("#denyIdValue").val(denyId);
+	}
+	if (allowId != null) {
+		$("#allowIdValue").val(allowId);
+	}
+	checkDenyAllow(denyAllow);
+
+	form.render();
+	denyAllowIndex = layer.open({
+		type: 1,
+		title: serverStr.denyAllowModel,
+		area: ['600px', '500px'], // 宽高
+		content: $('#denyAllowDiv')
+	});
+}
+
+function setDenyAllowOver() {
+	var denyAllow = $("#denyAllowValue").val();
+	var denyId = $("#denyIdValue").val();
+	var allowId = $("#allowIdValue").val();
+
+	$("#denyAllow").val(denyAllow);
+	$("#denyId").val(denyId);
+	$("#allowId").val(allowId);
+
+	layer.close(denyAllowIndex)
 }
 
 var paramIndex;
@@ -1056,3 +1145,5 @@ function editLocationDescr(id) {
 	});
 
 }
+
+
