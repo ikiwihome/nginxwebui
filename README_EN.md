@@ -20,9 +20,6 @@ After the deployment of this project, the configuration of nginx no longer need 
 
 ```
 Video course: https://www.bilibili.com/video/BV18A4y1D7GZ
-Demo address: http://test.nginxwebui.cn:7070
-User: admin
-password: admin
 ```
 
 #### Technical note
@@ -69,9 +66,9 @@ reboot
 
 ```
 Linux: mkdir /data/nginxwebui/   
-       wget -O /data/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-4.0.8.jar
+       wget -O /data/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-4.1.4.jar
 
-Windows: Download directly from your browser http://file.nginxwebui.cn/nginxwebui-4.0.8.jar into D:/data/nginxwebui/
+Windows: Download directly from your browser http://file.nginxwebui.cn/nginxwebui-4.1.4.jar into D:/data/nginxwebui/
 ```
 
 With a new version, you just need to change the version in the path

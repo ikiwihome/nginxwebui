@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Init;
@@ -16,19 +19,25 @@ import org.slf4j.LoggerFactory;
 
 import com.cym.model.Admin;
 import com.cym.model.Basic;
-import com.cym.model.Cert;
 import com.cym.model.Http;
 import com.cym.service.BasicService;
 import com.cym.service.ConfService;
 import com.cym.service.SettingService;
+import com.cym.sqlhelper.config.DataSourceEmbed;
+import com.cym.sqlhelper.config.Table;
+import com.cym.sqlhelper.utils.ConditionAndWrapper;
 import com.cym.sqlhelper.utils.SqlHelper;
 import com.cym.utils.EncodePassUtils;
 import com.cym.utils.MessageUtils;
 import com.cym.utils.NginxUtils;
 import com.cym.utils.SystemTool;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
+import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
@@ -53,12 +62,20 @@ public class InitConfig {
 	SqlHelper sqlHelper;
 	@Inject
 	ConfService confService;
-
+	@Inject
+	DataSourceEmbed dataSourceEmbed;
+	@Inject("${project.beanPackage}")
+	String packageName;
 	@Inject("${project.findPass}")
 	Boolean findPass;
 
 	@Init
 	public void start() throws Throwable {
+		// h2转sqlite
+		if (FileUtil.exist(homeConfig.home + "h2.mv.db")) {
+			transferSql();
+		}
+
 		// 找回密码
 		if (findPass) {
 			List<Admin> admins = sqlHelper.findAll(Admin.class);
@@ -89,14 +106,17 @@ public class InitConfig {
 			sqlHelper.insertAll(https);
 		}
 
-		// 释放nginx.conf,mime.types
+		// 释放基础nginx配置文件
+		if (!FileUtil.exist(homeConfig.home + "fastcgi.conf")) {
+			ClassPathResource resource = new ClassPathResource("conf.zip");
+			InputStream inputStream = resource.getStream();
+			ZipUtil.unzip(inputStream, new File(homeConfig.home), CharsetUtil.defaultCharset());
+		}
 		if (!FileUtil.exist(homeConfig.home + "nginx.conf")) {
 			ClassPathResource resource = new ClassPathResource("nginx.conf");
-			FileUtil.writeFromStream(resource.getStream(), homeConfig.home + "nginx.conf");
-		}
-		if (!FileUtil.exist(homeConfig.home + "mime.types")) {
-			ClassPathResource resource = new ClassPathResource("mime.types");
-			FileUtil.writeFromStream(resource.getStream(), homeConfig.home + "mime.types");
+			InputStream inputStream = resource.getStream();
+			FileUtil.writeFromStream(inputStream, homeConfig.home + "nginx.conf");
+
 		}
 
 		// 设置nginx配置文件
@@ -111,17 +131,14 @@ public class InitConfig {
 		String acmeShDir = homeConfig.home + ".acme.sh" + File.separator;
 		ClassPathResource resource = new ClassPathResource("acme.zip");
 		InputStream inputStream = resource.getStream();
-		FileUtil.writeFromStream(inputStream, homeConfig.home + "acme.zip");
-		FileUtil.mkdir(acmeShDir);
-		ZipUtil.unzip(homeConfig.home + "acme.zip", acmeShDir);
-		FileUtil.del(homeConfig.home + "acme.zip");
-
-		// 把acme的证书转移回来
-		returnAcme(acmeShDir);
+		ZipUtil.unzip(inputStream, new File(acmeShDir), CharsetUtil.defaultCharset());
 
 		// 全局黑白名单
 		if (settingService.get("denyAllow") == null) {
 			settingService.set("denyAllow", "0");
+		}
+		if (settingService.get("denyAllowStream") == null) {
+			settingService.set("denyAllowStream", "0");
 		}
 
 		if (SystemTool.isLinux()) {
@@ -157,47 +174,6 @@ public class InitConfig {
 		showLogo();
 	}
 
-	@Deprecated
-	private void returnAcme(String acmeShDir) {
-		// 把FileUtil.getUserHomeDir()/.acme.sh/下证书转移回去
-		File[] files = new File(FileUtil.getUserHomePath() + File.separator + ".acme.sh").listFiles();
-		if (files != null) {
-			for (File file : files) {
-				if (file.isDirectory() && notInAcmeFile(file)) {
-					FileUtil.move(file, new File(homeConfig.home + ".acme.sh"), true);
-				}
-			}
-		}
-
-		// 修改回数据库中证书路径
-		List<Cert> certs = sqlHelper.findAll(Cert.class);
-		for (Cert cert : certs) {
-			boolean changed = false;
-			if (StrUtil.isNotEmpty(cert.getPem()) && cert.getPem().contains(FileUtil.getUserHomePath() + File.separator + ".acme.sh")) {
-				cert.setPem(cert.getPem().replace(FileUtil.getUserHomePath() + File.separator + ".acme.sh" + File.separator, acmeShDir));
-				changed = true;
-			}
-			if (StrUtil.isNotEmpty(cert.getKey()) && cert.getKey().contains(FileUtil.getUserHomePath() + File.separator + ".acme.sh")) {
-				cert.setKey(cert.getKey().replace(FileUtil.getUserHomePath() + File.separator + ".acme.sh" + File.separator, acmeShDir));
-				changed = true;
-			}
-
-			if (changed) {
-				sqlHelper.updateById(cert);
-			}
-		}
-	}
-
-	@Deprecated
-	private boolean notInAcmeFile(File file) {
-		String name = file.getName();
-		if (name.equalsIgnoreCase(".github") || name.equalsIgnoreCase("deploy") || name.equalsIgnoreCase("dnsapi") || name.equalsIgnoreCase("notify") || name.equalsIgnoreCase("acme.sh")) {
-			return false;
-		}
-
-		return true;
-	}
-
 	private boolean hasNginx() {
 		String rs = RuntimeUtil.execForStr("which nginx");
 		if (StrUtil.isNotEmpty(rs)) {
@@ -222,6 +198,63 @@ public class InitConfig {
 
 		logger.info(stringBuilder.toString());
 
+	}
+
+	private void transferSql() {
+		// 关闭sqlite连接
+		dataSourceEmbed.getDataSource().close();
+		// 建立h2连接
+		HikariConfig dbConfig = new HikariConfig();
+		dbConfig.setJdbcUrl("jdbc:h2:" + homeConfig.home + "h2");
+		dbConfig.setUsername("sa");
+		dbConfig.setPassword("");
+		dbConfig.setMaximumPoolSize(1);
+		HikariDataSource dataSourceH2 = new HikariDataSource(dbConfig);
+		dataSourceEmbed.setDataSource(dataSourceH2);
+		// 读取全部数据
+		Map<String, List<?>> map = readAll();
+
+		// 关闭h2连接
+		dataSourceH2.close();
+
+		// 重新建立sqlite连接
+		dataSourceEmbed.init();
+
+		// 导入数据
+		insertAll(map);
+
+		// 重命名h2文件
+		FileUtil.rename(new File(homeConfig.home + "h2.mv.db"), homeConfig.home + "h2.mv.db.bak", true);
+	}
+
+	private Map<String, List<?>> readAll() {
+		Map<String, List<?>> map = new HashMap<>();
+
+		Set<Class<?>> set = ClassUtil.scanPackage(packageName);
+		for (Class<?> clazz : set) {
+			Table table = clazz.getAnnotation(Table.class);
+			if (table != null) {
+				try {
+					map.put(clazz.getName(), sqlHelper.findAll(clazz));
+				} catch (Exception e) {
+					logger.info(e.getMessage(), e);
+				}
+			}
+		}
+
+		return map;
+	}
+
+	private void insertAll(Map<String, List<?>> map) {
+		try {
+			for (String key : map.keySet()) {
+				sqlHelper.deleteByQuery(new ConditionAndWrapper(), Class.forName(key));
+
+				sqlHelper.insertAll(map.get(key));
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
 	}
 
 }
