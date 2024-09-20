@@ -217,7 +217,7 @@ function add() {
 
 function showWindow(title) {
 
-	var width = "1350px";
+	var width = "1380px";
 	var height = "90%";
 	if (window.innerWidth <= 1000) {
 		// 手机端
@@ -260,11 +260,13 @@ function addOver() {
 			over = false;
 		}
 	})
+	/*
 	$("select[name='proxyUpstreamId']").each(function() {
 		if ($("#proxyType").val() == 1 && ($(this).val() == '' || $(this).val() == null)) {
 			over = false;
 		}
 	})
+	*/
 	if (!over) {
 		layer.msg(serverStr.noFill);
 		return;
@@ -339,7 +341,8 @@ function addOver() {
 		location.cros = $(this).find("input[name='cros']").prop("checked") ? 1 : 0;
 		location.headerHost = $(this).find("select[name='headerHost']").val();
 		location.returnUrl = $(this).find("input[name='returnUrl']").val();
-		
+		location.returnPath = $(this).find("input[name='returnPath']").prop("checked") ? 1 : 0;
+
 		locations.push(location);
 	})
 
@@ -483,24 +486,11 @@ function edit(id, clone) {
 					$("#" + uuid + " input[name='upstreamPath']").val(location.upstreamPath);
 					$("#" + uuid + " select[name='headerHost']").val(location.headerHost);
 					$("#" + uuid + " input[name='returnUrl']").val(location.returnUrl);
-					
-					if (location.header == 1) {
-						$("#" + uuid + " input[name='header']").prop("checked", true);
-					} else {
-						$("#" + uuid + " input[name='header']").prop("checked", false);
-					}
 
-					if (location.websocket == 1) {
-						$("#" + uuid + " input[name='websocket']").prop("checked", true);
-					} else {
-						$("#" + uuid + " input[name='websocket']").prop("checked", false);
-					}
-
-					if (location.cros == 1) {
-						$("#" + uuid + " input[name='cros']").prop("checked", true);
-					} else {
-						$("#" + uuid + " input[name='cros']").prop("checked", false);
-					}
+					$("#" + uuid + " input[name='returnPath']").prop("checked", location.returnPath == 1);
+					$("#" + uuid + " input[name='header']").prop("checked", location.header == 1);
+					$("#" + uuid + " input[name='websocket']").prop("checked", location.websocket == 1);
+					$("#" + uuid + " input[name='cros']").prop("checked", location.cros == 1);
 
 					checkType(location.type, uuid)
 				}
@@ -684,6 +674,9 @@ function buildHtml(uuid, location, upstreamSelect) {
 						<div class="layui-inline">
 							<input type="text"  style="width: 277px;" name="returnUrl" id="returnUrl_${uuid}" class="layui-input long" value=""  placeholder="${serverStr.example}：https://www.baidu.com">
 						</div>
+						<div class="layui-inline" style="padding-left:7px;">
+							<input type="checkbox" name="returnPath" title="${serverStr.returnPath}" lay-skin="primary"> 
+						</div>
 					</span>
 				</td> 
 				<td>
@@ -792,10 +785,10 @@ function setDenyAllow() {
 	var allowId = $("#allowId").val();
 
 	$("#denyAllowValue").val(denyAllow);
-	if (denyId != null) {
+	if (denyId != null && denyId != "") {
 		$("#denyIdValue").val(denyId);
 	}
-	if (allowId != null) {
+	if (allowId != null && allowId != "") {
 		$("#allowIdValue").val(allowId);
 	}
 	checkDenyAllow(denyAllow);

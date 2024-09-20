@@ -5,7 +5,7 @@ ENV LANG=zh_CN.UTF-8 \
 ENV BOOT_OPTIONS="--server.port=8080"
 ENV project.home="/data/nginxwebui/"
 
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.cloud.tencent.com/g' /etc/apk/repositories
+# RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.cloud.tencent.com/g' /etc/apk/repositories
 RUN apk update
 RUN apk add --update --no-cache \
        nginx \

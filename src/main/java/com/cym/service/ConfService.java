@@ -325,8 +325,6 @@ public class ConfService {
 		List<String> strs = new ArrayList<>();
 		if (denyAllowValue == 1) {
 			// 黑名单
-			strs.add("allow all;");
-
 			DenyAllow denyAllow = sqlHelper.findById(denyId, DenyAllow.class);
 			if (denyAllow != null) {
 				String[] ips = denyAllow.getIp().split("\n");
@@ -334,6 +332,8 @@ public class ConfService {
 					strs.add("deny " + ip.trim() + ";");
 				}
 			}
+			
+			strs.add("allow all;");
 		}
 		if (denyAllowValue == 2) {
 			// 白名单
@@ -638,7 +638,7 @@ public class ConfService {
 
 				} else if (location.getType() == 4) { // 重定向
 					ngxParam = new NgxParam();
-					ngxParam.addValue("return 301 " + location.getReturnUrl() + "$request_uri");
+					ngxParam.addValue("return 301 " + location.getReturnUrl() + (location.getReturnPath() == 1 ? "$request_uri" : ""));
 					ngxBlockLocation.addEntry(ngxParam);
 				}
 
@@ -937,7 +937,7 @@ public class ConfService {
 				FileUtil.writeString(subContent.get(i), tagert, StandardCharsets.UTF_8); // 清空
 			}
 		}
-		
+
 		// 写入周边配置文件
 		ClassPathResource resource = new ClassPathResource("conf.zip");
 		InputStream inputStream = resource.getStream();

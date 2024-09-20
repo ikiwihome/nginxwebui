@@ -81,9 +81,8 @@ public class AppFilter implements Filter {
 		}
 
 		// 登录过滤器
-		if (path.toLowerCase().contains("/adminPage/".toLowerCase()) //
+		if ((path.toLowerCase().contains("/adminPage/".toLowerCase()) || path.toLowerCase().contains("/doc.html") || path.toLowerCase().contains("/doc/api.html"))//
 				&& !path.contains("/lib/") //
-				&& !path.contains("/doc/") //
 				&& !path.contains("/js/") //
 				&& !path.contains("/img/") //
 				&& !path.contains("/css/")) {
@@ -179,12 +178,12 @@ public class AppFilter implements Filter {
 
 					httpResponse = HttpRequest.post(url).body(body).execute();
 				}
-				
+
 				ctx.charset("utf-8");
 				ctx.headerSet("Content-Type", httpResponse.header("Content-Type"));
-				ctx.headerSet("content-disposition",httpResponse.header("content-disposition")); // 设置文件名
+				ctx.headerSet("content-disposition", httpResponse.header("content-disposition")); // 设置文件名
 				ctx.output(httpResponse.body());
-				
+
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 				ctx.redirect("/adminPage/login/noServer");
@@ -211,17 +210,17 @@ public class AppFilter implements Filter {
 		ctx.attrSet("showAdmin", ctx.param("showAdmin"));
 		ctx.attrSet("admin", ctx.session("admin"));
 
-		// 显示版本更新
-		if (versionConfig.newVersion != null && versionConfig.newVersion.getVersion() != null && versionConfig.currentVersion != null) {
-			ctx.attrSet("newVersion", versionConfig.newVersion);
+		// 不显示版本更新
+		// if (versionConfig.newVersion != null && versionConfig.newVersion.getVersion() != null && versionConfig.currentVersion != null) {
+		// 	ctx.attrSet("newVersion", versionConfig.newVersion);
 
-			int currentVersion = Integer.parseInt(versionConfig.currentVersion.replace(".", "").replace("v", ""));
-			int newVersion = Integer.parseInt(versionConfig.newVersion.getVersion().replace(".", "").replace("v", ""));
+		// 	int currentVersion = Integer.parseInt(versionConfig.currentVersion.replace(".", "").replace("v", ""));
+		// 	int newVersion = Integer.parseInt(versionConfig.newVersion.getVersion().replace(".", "").replace("v", ""));
 
-			if (currentVersion < newVersion) {
-				ctx.attrSet("hasNewVersion", 1);
-			}
-		}
+		// 	if (currentVersion < newVersion) {
+		// 		ctx.attrSet("hasNewVersion", 1);
+		// 	}
+		// }
 
 		// 读取配置文件
 		Properties properties = null;

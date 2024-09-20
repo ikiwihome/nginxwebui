@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.noear.solon.annotation.Component;
@@ -26,6 +27,7 @@ import com.cym.service.SettingService;
 import com.cym.sqlhelper.config.DataSourceEmbed;
 import com.cym.sqlhelper.config.Table;
 import com.cym.sqlhelper.utils.ConditionAndWrapper;
+import com.cym.sqlhelper.utils.JdbcTemplate;
 import com.cym.sqlhelper.utils.SqlHelper;
 import com.cym.utils.EncodePassUtils;
 import com.cym.utils.MessageUtils;
@@ -38,6 +40,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ClassUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
@@ -61,6 +64,8 @@ public class InitConfig {
 	@Inject
 	SqlHelper sqlHelper;
 	@Inject
+	JdbcTemplate jdbcTemplate;
+	@Inject
 	ConfService confService;
 	@Inject
 	DataSourceEmbed dataSourceEmbed;
@@ -68,11 +73,13 @@ public class InitConfig {
 	String packageName;
 	@Inject("${project.findPass}")
 	Boolean findPass;
+	@Inject("${spring.database.type}")
+	String databaseType;
 
 	@Init
 	public void start() throws Throwable {
 		// h2转sqlite
-		if (FileUtil.exist(homeConfig.home + "h2.mv.db")) {
+		if ((databaseType.equalsIgnoreCase("sqlite") || databaseType.equalsIgnoreCase("h2")) && FileUtil.exist(homeConfig.home + "h2.mv.db")) {
 			transferSql();
 		}
 
@@ -80,9 +87,11 @@ public class InitConfig {
 		if (findPass) {
 			List<Admin> admins = sqlHelper.findAll(Admin.class);
 			for (Admin admin : admins) {
-				System.out.println(m.get("adminStr.name") + ":" + admin.getName() + " " + m.get("adminStr.pass") + ":" + EncodePassUtils.defaultPass);
+				String randomPass = RandomUtil.randomString(8);
+				
+				System.out.println(m.get("adminStr.name") + ":" + admin.getName() + " " + m.get("adminStr.pass") + ":" + randomPass);
 				admin.setAuth(false); // 关闭二次验证
-				admin.setPass(EncodePassUtils.encodeDefaultPass());
+				admin.setPass(EncodePassUtils.encode(randomPass));
 				sqlHelper.updateById(admin);
 			}
 			System.exit(1);
@@ -235,7 +244,9 @@ public class InitConfig {
 			Table table = clazz.getAnnotation(Table.class);
 			if (table != null) {
 				try {
-					map.put(clazz.getName(), sqlHelper.findAll(clazz));
+					List<Map<String, Object>> list = jdbcTemplate.queryForList("SELECT * FROM `" + StrUtil.toUnderlineCase(clazz.getSimpleName()) + "`");
+
+					map.put(clazz.getName(), sqlHelper.buildObjects(list, clazz));
 				} catch (Exception e) {
 					logger.info(e.getMessage(), e);
 				}

@@ -66,9 +66,9 @@ reboot
 
 ```
 Linux: mkdir /data/nginxwebui/   
-       wget -O /data/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-4.1.4.jar
+       wget -O /data/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-4.2.4.jar
 
-Windows: Download directly from your browser http://file.nginxwebui.cn/nginxwebui-4.1.4.jar into D:/data/nginxwebui/
+Windows: Download directly from your browser http://file.nginxwebui.cn/nginxwebui-4.2.4.jar into D:/data/nginxwebui/
 ```
 
 With a new version, you just need to change the version in the path
