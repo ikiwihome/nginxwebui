@@ -1,10 +1,14 @@
+# Docker Hub mirrors can be configured on the builder (Tencent's mirror requires its VPC).
 FROM alpine:3.24.3
 ENV LANG=zh_CN.UTF-8 \
     TZ=Asia/Shanghai \
     PS1="\u@\h:\w \$ "
 ENV BOOT_OPTIONS="--server.port=8080"
 ENV project.home="/data/nginxwebui/"
-RUN apk add --update --no-cache \
+
+# Change if required, for example, to use a different mirror or to add additional packages.
+RUN sed -i 's|dl-cdn.alpinelinux.org|mirrors.cloud.tencent.com|g' /etc/apk/repositories \
+    && apk add --update --no-cache \
     nginx \
     nginx-mod-stream \
     nginx-mod-stream-geoip \
