@@ -1,4 +1,7 @@
 *
-!target/nginxwebui-*.jar
+!src/
+!src/**
+!pom.xml
+!docker-maven-settings.xml
 !Dockerfile
 !entrypoint.sh

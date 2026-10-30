@@ -4,9 +4,9 @@
 ## 需要安装好docker-buildx：https://docs.docker.com/engine/install/ubuntu/
 ## 如需自动推送readme至dockerhub，需要安装docker-pushrm：https://github.com/christian-korneck/docker-pushrm
 ## Dockerfile同目录下运行此脚本
-## 如果在同目录下存在maven的镜像加速配置文件settings.xml，也会作为编译时的加速配置
+## Docker 构建阶段会使用 docker-maven-settings.xml 配置的 Maven 镜像源
 
-set -o pipefail
+set -e -o pipefail
 
 ## 基本信息
 repo="ikiwicc/nginxwebui"
@@ -15,11 +15,6 @@ ver=$(cat pom.xml | grep -A1 nginxwebui | grep version | grep -oP "\d+\.\d+\.\d+
 echo "构建镜像：$repo"
 echo "构建架构：$arch"
 echo "构建版本：$ver"
-
-## 编译jar文件
-echo "3秒后开始编译jar文件..."
-sleep 3
-mvn clean package
 
 ## 准备跨平台构建环境
 echo "准备跨平台构建环境"

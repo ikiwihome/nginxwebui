@@ -178,7 +178,7 @@ Compile the package with Maven
 mvn clean package
 ```
 
-Compile the image with Docker
+Build the image from the project root. Docker compiles the source, so a prebuilt jar and a host Maven installation are not required.
 
 ```
 docker build -t nginxwebui:latest .

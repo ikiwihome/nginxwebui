@@ -189,7 +189,7 @@ services:
 mvn clean package
 ```
 
-使用docker构建镜像
+在项目根目录使用 Docker 构建镜像；Docker 会自行编译源码，无需预先生成 jar 或在宿主机安装 Maven。
 
 ```
 docker build -t nginxwebui:latest .
