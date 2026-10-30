@@ -56,6 +56,7 @@ public class LoginController extends BaseController {
 	@Mapping("")
 	public ModelAndView admin(ModelAndView modelAndView, String adminId) {
 		modelAndView.put("adminCount", sqlHelper.findAllCount(Admin.class));
+		modelAndView.put("ssoEnabled", settingService.isSsoEnabled());
 		modelAndView.view("/adminPage/login/index.html");
 		return modelAndView;
 	}

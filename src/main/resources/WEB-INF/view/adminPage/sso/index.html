@@ -54,7 +54,13 @@ input[type='radio'] {
 			<fieldset class="layui-elem-field layui-field-title">
 				<legend>SSO-OAuth2.0配置</legend>
 			</fieldset>
-			<form id="addForm" style="margin-top: 48px">
+			<form id="addForm" class="layui-form" style="margin-top: 48px">
+				<div class="layui-form-item">
+					<label class="layui-form-label">${ssoStr.enabled}</label>
+					<div class="layui-input-block">
+						<input type="checkbox" id="ssoEnabled" lay-skin="switch" lay-text="ON|OFF" <#if ssoEnabled>checked</#if>>
+					</div>
+				</div>
 
 				<div class="layui-form-item">
 					<label class="layui-form-label">${ssoStr.codeAddr}</label>
@@ -140,7 +146,8 @@ input[type='radio'] {
 	async function save(){
 		const form = document.getElementById('addForm');
 		const formData = new FormData(form);
-		const response = await fetch('/adminPage/sso/save', {
+		formData.set('enabled', document.getElementById('ssoEnabled').checked ? 'true' : 'false');
+		const response = await fetch(ctx + '/adminPage/sso/save', {
 			method: 'POST',
 			body: formData
 		});

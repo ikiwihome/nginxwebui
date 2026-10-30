@@ -41,6 +41,12 @@ public class SettingService {
 		}
 	}
 
+	public boolean isSsoEnabled() {
+		String enabled = get("sso_enabled");
+		// Preserve existing SSO installations when upgrading, but hide it for new setups.
+		return enabled == null ? cn.hutool.core.util.StrUtil.isNotBlank(get("sso_codeUrl")) : "true".equals(enabled);
+	}
+
 	public void remove(String key) {
 		sqlHelper.deleteByQuery(new ConditionAndWrapper().eq("key", key), Setting.class);
 
