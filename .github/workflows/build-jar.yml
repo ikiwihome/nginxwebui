@@ -3,7 +3,14 @@ name: Build nginxwebui jar
 on:
   push:
   pull_request:
+  release:
+    types: [published]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag to build and publish (leave empty for artifact only)'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -14,6 +21,8 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.release_tag || github.sha }}
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -45,12 +54,18 @@ jobs:
           if-no-files-found: error
 
   release:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.release_tag != '')
     needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      - name: Check out release history
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.release_tag || github.ref_name }}
+          fetch-depth: 0
+
       - name: Download jar
         uses: actions/download-artifact@v4
         with:
@@ -61,10 +76,41 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          TAG_NAME: ${{ github.ref_name }}
+          TAG_NAME: ${{ github.event.release.tag_name || inputs.release_tag || github.ref_name }}
         run: |
+          set -euo pipefail
+          tag_ref="refs/tags/$TAG_NAME"
+          git rev-parse --verify --quiet "${tag_ref}^{commit}" >/dev/null
+          previous_tag=$(git describe --tags --abbrev=0 "${tag_ref}^" 2>/dev/null || true)
+          commit_time=$(git show -s --format=%cI "$tag_ref")
+          release_date=$(TZ=Asia/Shanghai date -d "$commit_time" +%Y%m%d)
+          release_title="更新到${TAG_NAME#v} ${release_date}"
+          notes="$RUNNER_TEMP/release-notes.md"
+          {
+            echo '<!-- nginxwebui-changelog -->'
+            echo '## 更新内容'
+            echo
+            if [ -n "$previous_tag" ]; then
+              printf '自 `%s` 以来的提交：\n\n' "$previous_tag"
+              git log --format='- %s (%h)%n%n%b' "refs/tags/${previous_tag}..${tag_ref}"
+            else
+              echo '此版本包含的提交：'
+              echo
+              git log --format='- %s (%h)%n%n%b' "$tag_ref"
+            fi
+          } > "$notes"
+
           if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            existing_notes="$RUNNER_TEMP/existing-release-notes.md"
+            gh release view "$TAG_NAME" --json body --jq '.body // ""' > "$existing_notes"
+            if ! grep -Fq '<!-- nginxwebui-changelog -->' "$existing_notes"; then
+              printf '\n\n' >> "$existing_notes"
+              cat "$notes" >> "$existing_notes"
+              gh release edit "$TAG_NAME" --title "$release_title" --notes-file "$existing_notes"
+            else
+              gh release edit "$TAG_NAME" --title "$release_title"
+            fi
             gh release upload "$TAG_NAME" dist/nginxwebui.jar --clobber
           else
-            gh release create "$TAG_NAME" dist/nginxwebui.jar --verify-tag --generate-notes
+            gh release create "$TAG_NAME" dist/nginxwebui.jar --verify-tag --title "$release_title" --notes-file "$notes"
           fi
