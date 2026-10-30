@@ -26,7 +26,7 @@ $(function() {
 		var upload = layui.upload;
 		upload.render({
 			elem: '#pemBtn',
-			url: '/adminPage/main/upload',
+			url: ctx + '/adminPage/main/upload',
 			accept: 'file',
 			done: function(res) {
 				// 上传完毕回调
@@ -44,7 +44,7 @@ $(function() {
 
 		upload.render({
 			elem: '#keyBtn',
-			url: '/adminPage/main/upload',
+			url: ctx + '/adminPage/main/upload',
 			accept: 'file',
 			done: function(res) {
 				// 上传完毕回调
@@ -104,6 +104,7 @@ function checkDnsType(value) {
 	$("#tencent").hide();
 	$("#aws").hide();
 	$("#cf").hide();
+	$("#cfToken").hide();
 	$("#gd").hide();
 	$("#hw").hide();
 	$("#ipv64").hide();
@@ -144,6 +145,11 @@ function add() {
 	$("#awsSecretAccessKey").val("");
 	$("#cfEmail").val("");
 	$("#cfKey").val("");
+	
+	$("#cft").val("");
+	$("#cfAccountId").val("");
+	$("#cfZoneId").val("");	
+		
 	$("#gdKey").val("");
 	$("#gdSecret").val("");
 	$("#ipv64Token").val("");
@@ -205,6 +211,10 @@ function edit(id, clone) {
 				$("#awsSecretAccessKey").val(cert.awsSecretAccessKey);
 				$("#cfEmail").val(cert.cfEmail);
 				$("#cfKey").val(cert.cfKey);
+				
+				$("#cft").val(cert.cfToken);
+				$("#cfAccountId").val(cert.cfAccountId);
+				$("#cfZoneId").val(cert.cfZoneId);	
 
 				$("#gdKey").val(cert.gdKey);
 				$("#gdSecret").val(cert.gdSecret);
@@ -308,6 +318,14 @@ function addOver() {
 				return;
 			}
 		}
+		
+		if ($("#dnsType").val() == 'cfToken') {
+			if ($("#cft").val() == '') {
+				layer.msg(commonStr.IncompleteEntry);
+				return;
+			}
+		}
+				
 		if ($("#dnsType").val() == 'gd') {
 			if ($("#gdKey").val() == '' || $("#gdSecret").val() == '') {
 				layer.msg(commonStr.IncompleteEntry);
@@ -431,7 +449,7 @@ function delMany() {
 function issue(id) {
 
 	if (confirm(certStr.confirm1)) {
-		layer.load();
+		showLoad();
 		$.ajax({
 			type: 'POST',
 			url: ctx + '/adminPage/cert/apply',
@@ -441,7 +459,7 @@ function issue(id) {
 			},
 			dataType: 'json',
 			success: function(data) {
-				layer.closeAll();
+				closeLoad();
 				if (data.success) {
 					layer.alert(certStr.applySuccess, function(index) {
 						layer.close(index);
@@ -456,7 +474,7 @@ function issue(id) {
 				}
 			},
 			error: function() {
-				layer.closeAll();
+				closeLoad();
 				layer.alert(commonStr.errorInfo);
 			}
 		});
@@ -467,7 +485,7 @@ function issue(id) {
 function renew(id) {
 
 	if (confirm(certStr.confirm2)) {
-		layer.load();
+		showLoad();
 		$.ajax({
 			type: 'POST',
 			url: ctx + '/adminPage/cert/apply',
@@ -477,7 +495,7 @@ function renew(id) {
 			},
 			dataType: 'json',
 			success: function(data) {
-				layer.closeAll();
+				closeLoad();
 				if (data.success) {
 					layer.alert(certStr.renewSuccess, function(index) {
 						layer.close(index);
@@ -492,7 +510,7 @@ function renew(id) {
 				}
 			},
 			error: function() {
-				layer.closeAll();
+				closeLoad();
 				layer.alert(commonStr.errorInfo);
 			}
 		});

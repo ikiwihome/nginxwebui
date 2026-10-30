@@ -49,7 +49,7 @@ $(function() {
 		var upload = layui.upload;
 		upload.render({
 			elem: '#pemBtn',
-			url: '/adminPage/server/upload',
+			url: ctx + '/adminPage/server/upload',
 			accept: 'file',
 			done: function(res) {
 				// 上传完毕回调
@@ -66,7 +66,7 @@ $(function() {
 
 		upload.render({
 			elem: '#keyBtn',
-			url: '/adminPage/server/upload',
+			url: ctx + '/adminPage/server/upload',
 			accept: 'file',
 			done: function(res) {
 				// 上传完毕回调
@@ -216,7 +216,7 @@ function add() {
 }
 
 function showWindow(title) {
-
+	/*
 	var width = "1380px";
 	var height = "90%";
 	if (window.innerWidth <= 1000) {
@@ -229,6 +229,16 @@ function showWindow(title) {
 		type: 1,
 		title: title,
 		area: [width, height], // 宽高
+		content: $('#windowDiv')
+	});
+	*/
+
+	layer.open({
+		type: 1,
+		title: title,
+		offset: 'r',
+		anim: 'slideLeft', // 从右往左
+		area: ["90%", '100%'],
 		content: $('#windowDiv')
 	});
 }
@@ -272,7 +282,7 @@ function addOver() {
 		return;
 	}
 
-
+	showLoad();
 	var server = {};
 	server.id = $("#id").val();
 	server.proxyType = $("#proxyType").val();
@@ -326,6 +336,7 @@ function addOver() {
 
 	$(".itemList").children().each(function() {
 		var location = {};
+		location.enable = $(this).find("input[name='enable']").prop("checked") ? 1 : 0;
 		location.path = $(this).find("input[name='path']").val();
 		location.type = $(this).find("select[name='type']").val();
 		location.value = $(this).find("input[name='value']").val();
@@ -356,6 +367,7 @@ function addOver() {
 		},
 		dataType: 'json',
 		success: function(data) {
+			closeLoad();
 			if (data.success) {
 				location.reload();
 			} else {
@@ -363,6 +375,7 @@ function addOver() {
 			}
 		},
 		error: function() {
+			closeLoad();
 			layer.alert(commonStr.errorInfo);
 		}
 	});
@@ -589,16 +602,23 @@ function buildHtml(uuid, location, upstreamSelect) {
 		location = {
 			path: "/",
 			type: "0",
+			enable: 1,
 			locationParamJson: ""
 		};
 	}
 	//将双引号转义
 	location.path = location.path.replace(/\"/g, "&quot;");
 
+	var checked = location.enable ? "checked" : "";
 	var str = `<tr id='${uuid}'>
 				<td>
 					<div class="layui-inline" >
-						<input type="text" name="path" class="layui-input short" value="${location.path}">
+						<input type="checkbox" name="enable" value="${location.id}" lay-skin="switch" ${checked}>
+					</div>
+				</td>
+				<td>
+					<div class="layui-inline" >
+						<input type="text" name="path" class="layui-input middle" value="${location.path}">
 					</div>
 				</td>
 				<td>
@@ -612,52 +632,52 @@ function buildHtml(uuid, location, upstreamSelect) {
 						</select>
 					</div>
 				</td>
-				
+
 				<td style="width: 740px;">
 					<span name="valueSpan">
 						<div class="layui-inline">
-							<input type="text"  style="width: 277px;" name="value" id="value_${uuid}" class="layui-input long" value=""  placeholder="${serverStr.example}：http://127.0.0.1:8080">
+							<input type="text"  name="value" id="value_${uuid}" class="layui-input middle" value=""  placeholder="${serverStr.example}：http://127.0.0.1:8080">
 						</div>
 					</span>
-					
+
 					<span name="rootPathSpan">
-						<div class="layui-inline" style="width: 124px;"> 
+						<div class="layui-inline" style="width: 124px;">
 							<select name="rootType" >
 								<option value="root">${serverStr.rootModel}</option>
 								<option value="alias">${serverStr.aliasModel}</option>
 							</select>
 						</div>
-						
+
 						<div class="layui-inline" style="width: 150px;">
 							<input type="text" name="rootPath" id="rootPath_${uuid}" class="layui-input" placeholder="${serverStr.example}：/root/www">
 						</div>
-						
+
 						<div class="layui-inline">
-							<i class="layui-icon layui-icon-export" lang="value" onclick="selectWww('${uuid}')"></i> 
+							<i class="layui-icon layui-icon-export" lang="value" onclick="selectWww('${uuid}')"></i>
 						</div>
-						
+
 						<div class="layui-inline" style="width: 120px;">
 							<input type="text" name="rootPage" id="rootPage_${uuid}" class="layui-input" placeholder="${serverStr.defaultPage}">
-						</div>	
+						</div>
 					</span>
-					
+
 					<span name="upstreamSelectSpan">
 						${upstreamSelect}
 					</span>
-					
+
 					<span name="blankSpan">
-					
+
 					</span>
-					
+
 					<span name="headerSpan" style="padding-left:7px;">
 						<div class="layui-inline">
-							<input type="checkbox" name="websocket" title="${serverStr.websocket}" lay-skin="primary"> 
+							<input type="checkbox" name="websocket" title="${serverStr.websocket}" lay-skin="primary">
 						</div>
 						<div class="layui-inline">
-							<input type="checkbox" name="cros" title="${serverStr.cros}" lay-skin="primary"> 
+							<input type="checkbox" name="cros" title="${serverStr.cros}" lay-skin="primary">
 						</div>
 						<div class="layui-inline">
-							<input type="checkbox" name="header" title="${serverStr.headerAddHost} :" lay-skin="primary" checked> 
+							<input type="checkbox" name="header" title="${serverStr.headerAddHost} :" lay-skin="primary" checked>
 						</div>
 						<div class="layui-inline" style="width: 110px;">
 							<select name="headerHost" lay-filter="type">
@@ -665,33 +685,33 @@ function buildHtml(uuid, location, upstreamSelect) {
 								<option ${location.headerHost == '$http_host' ? 'selected' : ''}>$http_host</option>
 								<option ${location.headerHost == '$host:$proxy_port' ? 'selected' : ''}>$host:$proxy_port</option>
 								<option ${location.headerHost == '$host:$server_port' ? 'selected' : ''}>$host:$server_port</option>
-								
+								<option ${location.headerHost == '$proxy_host:$proxy_port' ? 'selected' : ''}>$proxy_host:$proxy_port</option>
 							</select>
 						</div>
 					</span>
-					
+
 					<span name="returnSpan">
 						<div class="layui-inline">
 							<input type="text"  style="width: 277px;" name="returnUrl" id="returnUrl_${uuid}" class="layui-input long" value=""  placeholder="${serverStr.example}：https://www.baidu.com">
 						</div>
 						<div class="layui-inline" style="padding-left:7px;">
-							<input type="checkbox" name="returnPath" title="${serverStr.returnPath}" lay-skin="primary"> 
+							<input type="checkbox" name="returnPath" title="${serverStr.returnPath}" lay-skin="primary">
 						</div>
 					</span>
-				</td> 
+				</td>
 				<td>
 					<textarea style="display: none;" id="locationParamJson_${uuid}" name="locationParamJson" >${location.locationParamJson}</textarea>
 					<div class="layui-inline">
-						<button type="button" class="layui-btn layui-btn-sm" onclick="locationParam('${uuid}')">${serverStr.extParm}</button>
+						<button type="button" class="layui-btn layui-btn-xs" onclick="locationParam('${uuid}')">${serverStr.extParm}</button>
 					</div>
 					<div class="layui-inline">
-						<button type="button" class="layui-btn layui-btn-sm layui-btn-danger" onclick="delTr('${uuid}')">${commonStr.del}</button>
+						<button type="button" class="layui-btn layui-btn-xs layui-btn-danger" onclick="delTr('${uuid}')">${commonStr.del}</button>
 					</div>
 					<div class="layui-inline">
-						<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', -1)">${commonStr.up}</button>
+						<button type="button" class="layui-btn layui-btn-normal layui-btn-xs" onclick="setParamOrder('${uuid}', -1)">${commonStr.up}</button>
 					</div>
 					<div class="layui-inline">
-						<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', 1)">${commonStr.down}</button>
+						<button type="button" class="layui-btn layui-btn-normal layui-btn-xs" onclick="setParamOrder('${uuid}', 1)">${commonStr.down}</button>
 					</div>
 				</td>
 			</tr>`
@@ -819,6 +839,7 @@ function fillTable(params) {
 	var html = "";
 	for (var i = 0; i < params.length; i++) {
 		var param = params[i];
+		var position = param.position || 0;
 
 		var uuid = guid();
 		if (param.templateValue == null) {
@@ -827,24 +848,35 @@ function fillTable(params) {
 				<td>
 					<textarea  name="name" class="layui-textarea">${param.name}</textarea>
 				</td>
-				<td  style="width: 50%;">
+				<td  style="width: 40%;">
 					<textarea  name="value" class="layui-textarea">${param.value}</textarea>
 				</td>
+				<td style="width: 100px;">
+					<select name="position" style="height: 30px;">
+						<option value="0" ${position == 0 ? 'selected' : ''}>${serverStr.paramAppend}</option>
+						<option value="1" ${position == 1 ? 'selected' : ''}>${serverStr.paramPrepend}</option>
+					</select>
+				</td>
 				<td>
-					<button type="button" class="layui-btn layui-btn-sm layui-btn-danger" onclick="delTr('${uuid}')">${commonStr.del}</button>
-					
-					<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', -1)">${commonStr.up}</button>
-					<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', 1)">${commonStr.down}</button>
+					<div class="layui-inline">
+						<button type="button" class="layui-btn layui-btn-sm layui-btn-danger" onclick="delTr('${uuid}')">${commonStr.del}</button>
+					</div>
+					<div class="layui-inline">
+						<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', -1)">${commonStr.up}</button>
+					</div>
+					<div class="layui-inline">
+						<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', 1)">${commonStr.down}</button>
+					</div>
 				</td>
 			</tr>
 			`;
 		} else {
-			html += buildTemplateParam(uuid, param);
+			html += buildTemplateParam(uuid, param, true);
 		}
 	}
 
 	$("#paramList").html(html);
-
+	form.render();
 	paramIndex = layer.open({
 		type: 1,
 		title: serverStr.extParm,
@@ -861,35 +893,49 @@ function addParam() {
 		<td>
 			<textarea  name="name" class="layui-textarea"></textarea>
 		</td>
-		<td style="width: 50%;">
+		<td style="width: 40%;">
 			<textarea  name="value" class="layui-textarea"></textarea>
 		</td>
+		<td style="width: 100px;">
+			<select name="position" style="height: 30px;">
+				<option value="0" selected>${serverStr.paramAppend}</option>
+				<option value="1">${serverStr.paramPrepend}</option>
+			</select>
+		</td>
 		<td>
-			<button type="button" class="layui-btn layui-btn-sm layui-btn-danger" onclick="delTr('${uuid}')">${commonStr.del}</button>
-			
-			<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', -1)">${commonStr.up}</button>
-			<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', 1)">${commonStr.down}</button>
+			<div class="layui-inline">
+				<button type="button" class="layui-btn layui-btn-sm layui-btn-danger" onclick="delTr('${uuid}')">${commonStr.del}</button>
+			</div>
+			<div class="layui-inline">
+				<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', -1)">${commonStr.up}</button>
+			</div>
+			<div class="layui-inline">
+				<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', 1)">${commonStr.down}</button>
+			</div>
 		</td>
 	</tr>
 	`;
 
 	$("#paramList").append(html);
-
+	form.render();
 }
 
 
 function addParamOver() {
 
 	var targertId = $("#targertId").val();
+
 	var params = [];
 	$("tr[name='param']").each(function() {
 		var param = {};
 		if ($(this).find("input[name='templateValue']").val() == null) {
 			param.name = $(this).find("textarea[name='name']").val();
 			param.value = $(this).find("textarea[name='value']").val();
+			param.position = parseInt($(this).find("select[name='position']").val()) || 0;
 		} else {
 			param.templateValue = $(this).find("input[name='templateValue']").val();
 			param.templateName = $(this).find("input[name='templateName']").val();
+			param.position = parseInt($(this).find("select[name='position']").val()) || 0;
 		}
 		params.push(param);
 	})
@@ -973,7 +1019,7 @@ function selectRootCustom(inputId) {
 
 function testPort() {
 	if (confirm(serverStr.testAllPort)) {
-		layer.load();
+		showLoad();
 		$.ajax({
 			type: 'POST',
 			url: ctx + '/adminPage/server/testPort',
@@ -989,7 +1035,7 @@ function testPort() {
 				}
 			},
 			error: function() {
-				layer.closeAll();
+				closeLoad();
 				layer.alert(commonStr.errorInfo);
 			}
 		});
@@ -1089,7 +1135,7 @@ function editLocationDescr(id) {
 			if (data.success) {
 				/*$("#serverId").val(id);
 				$("#descr").val(data.obj!=null?data.obj:'');
-				
+
 				layer.open({
 					type: 1,
 					title: serverStr.descr,
@@ -1140,3 +1186,7 @@ function editLocationDescr(id) {
 }
 
 
+function showLocation(id){
+	$("#" + id + "_str").removeAttr('style');
+	$("#" + id + "_a").hide();
+}

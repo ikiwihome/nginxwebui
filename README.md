@@ -28,9 +28,9 @@ nginx本身功能复杂, nginxwebui并不能涵盖nginx所有功能, 但能覆�
 
 #### 技术说明
 
-本项目是基于solon的web系统, 数据库使用h2, 因此服务器上不需要安装任何数据库
+本项目是基于solon的web系统, 数据库使用sqlite, 因此服务器上不需要安装任何数据库
 
-本系统通过Let's encrypt申请证书, 使用acme.sh脚本进行自动化申请和续签, 开启续签的证书将在每天凌晨2点进行续签, 只有超过60天的证书才会进行续签. 只支持在linux下签发证书.
+本系统通过Let's encrypt申请证书, 使用acme.sh脚本进行自动化申请和续签, 每两小时检查开启自动续签的证书, 只有签发超过60天的证书才会进行续签. 只支持在linux下签发证书.
 
 添加tcp/ip转发配置支持时, 一些低版本的nginx可能需要重新编译，通过添加–with-stream参数指定安装stream模块才能使用, 但在ubuntu 18.04下, 官方软件库中的nginx已经带有stream模块, 不需要重新编译. 本系统如果配置了tcp转发项的话, 会自动引入ngx_stream_module.so的配置项, 如果没有开启则不引入, 最大限度优化ngnix配置文件. 
 
@@ -68,13 +68,19 @@ Path : JDK安装目录\bin
 ```
 
 
-2.下载最新版发行包jar
+2. 编译本项目并复制生成的 jar
 
+```bash
+mvn clean package
+mkdir -p /data/nginxwebui/
+cp target/nginxwebui-4.4.3.jar /data/nginxwebui/nginxwebui.jar
 ```
-Linux: mkdir /data/nginxwebui/ 
-       wget -O /data/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-4.2.4.jar
 
-Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/nginxwebui-4.2.4.jar 到 D:/data/nginxwebui/nginxwebui.jar
+Windows 下将 `target/nginxwebui-4.4.3.jar` 复制到 `D:/data/nginxwebui/nginxwebui.jar`。请使用本项目构建的 jar，以保留本地定制。
+
+3.jar
+
+Windows: 直接使用浏览器下载 https://gitee.com/cym1102/nginxWebUI/releases/download/4.4.3/nginxWebUI-4.4.3.jar 到 D:/data/nginxwebui/nginxwebui.jar
 ```
 
 有新版本只需要修改路径中的版本即可
@@ -93,13 +99,19 @@ Windows: java -jar -Dfile.encoding=UTF-8 D:/data/nginxwebui/nginxwebui.jar --ser
 
 --project.home 项目配置文件目录，存放数据库文件，证书文件，日志等, 默认为/data/nginxwebui/
 
---spring.database.type=mysql 使用其他数据库，不填为使用本地h2数据库，可选mysql
+--spring.database.type=mysql 使用其他数据库，不填为使用本地sqlite数据库，可选mysql、postgresql
 
---spring.datasource.url=jdbc:mysql://ip:port/nginxwebui 数据库url
+--spring.datasource.url=jdbc:mysql://ip:port/nginxwebui 数据库url 
 
 --spring.datasource.username=root  数据库用户
 
 --spring.datasource.password=pass  数据库密码
+
+--init.admin=admin 初始用户名
+
+--init.pass=admin 初始用户密码
+
+--init.api=true 初始用户开启api权限
 
 注意Linux命令最后加一个&号, 表示项目后台运行
 
@@ -210,7 +222,7 @@ Restart=always
 WantedBy=multi-user.target
 ```
 
-之后执行
+2. 之后执行
 
 ```
 systemctl daemon-reload

@@ -26,6 +26,7 @@ public class NginxWebUI {
 
 	public static void main(String[] args) {
 		boolean findPass = false;
+		
 		if (args != null) {
 			for (String arg : args) {
 				if (arg.equals("--project.findPass=true")) {
@@ -33,7 +34,7 @@ public class NginxWebUI {
 				}
 			}
 		}
-
+		
 		try {
 			if (!findPass) {
 				// 尝试杀掉旧版本
@@ -46,22 +47,7 @@ public class NginxWebUI {
 			logger.error(e.getMessage(), e);
 		}
 
-		Solon.start(NginxWebUI.class, args, app -> {
-			app.onError(e -> logger.error(e.getMessage(), e));
-
-			app.before(c -> {
-				String path = c.path();
-				while (path.contains("//")) {
-					path = path.replace("//", "/");
-				}
-				c.pathNew(path);
-			});
-
-			app.onEvent(freemarker.template.Configuration.class, cfg -> {
-				cfg.setSetting("classic_compatible", "true");
-				cfg.setSetting("number_format", "0.##");
-			});
-		});
+		Solon.start(NginxWebUI.class, args);
 	}
 
 	public static void killSelf(String[] args) {
@@ -87,7 +73,7 @@ public class NginxWebUI {
 		List<String> pids = new ArrayList<>();
 
 		if (SystemTool.isWindows()) {
-			List<String> list = RuntimeUtil.execForLines("wmic process where \"CommandLine like '%nginxwebui%'\" get ProcessId,CommandLine");
+			List<String> list = RuntimeUtil.execForLines("wmic process where \"Name='java.exe' and CommandLine like '%nginxwebui%'\" get ProcessId,CommandLine");
 
 			for (String line : list) {
 				if (line.contains(".jar")) {
@@ -96,12 +82,12 @@ public class NginxWebUI {
 				}
 			}
 		} else {
-			List<String> list = RuntimeUtil.execForLines("/bin/sh", "-c", "ps -ef | grep nginxwebui");
+			List<String> list = RuntimeUtil.execForLines("/bin/sh", "-c", "ps -C java -o pid=,args=");
 
 			for (String line : list) {
-				if (line.contains(".jar")) {
-					String[] lines = line.split("\\s+");
-					pids.add(lines[1]);
+				if (line.contains("nginxwebui") && line.contains(".jar") && !line.contains("nginxWebUI-Website")) {
+					String[] lines = line.trim().split("\\s+");
+					pids.add(lines[0]);
 				}
 			}
 		}

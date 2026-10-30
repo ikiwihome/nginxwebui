@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.swing.JPanel;
 
+import com.cym.config.ViewConfig;
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.annotation.Mapping;
@@ -29,6 +30,7 @@ import com.wf.captcha.base.Captcha;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.lang.UUID;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 
 /**
@@ -141,9 +143,6 @@ public class LoginController extends BaseController {
 		Context.current().sessionSet("admin", admin);
 		Context.current().sessionRemove("imgCode"); // 立刻销毁验证码
 
-		// 检查更新
-		versionConfig.checkVersion();
-
 		return renderSuccess(admin);
 	}
 
@@ -159,8 +158,6 @@ public class LoginController extends BaseController {
 			Context.current().sessionSet("admin", admin);
 			Context.current().sessionRemove("imgCode"); // 立刻销毁验证码
 
-			// 检查更新
-			versionConfig.checkVersion();
 
 			return renderSuccess(admin);
 		} else {
@@ -202,7 +199,6 @@ public class LoginController extends BaseController {
 
 		Admin ad = new Admin();
 		ad.setAuth(admin.getAuth());
-		ad.setKey(admin.getKey());
 
 		return renderSuccess(ad);
 	}
@@ -327,11 +323,11 @@ public class LoginController extends BaseController {
 			if (lang.equals("zh")) {
 				lang = "";
 			}
+			ViewConfig.lang = lang;
 			settingService.set("lang", lang);
 		}
 
 		return renderSuccess();
 	}
-
 
 }

@@ -44,3 +44,8 @@ spring:
     url: 
     username: 
     password: 
+
+init:
+  admin: 
+  pass: 
+  api: 

@@ -39,5 +39,3 @@ docker buildx build \
     --push \
     .
 
-## 推送readme.md至dockerhub，需要docker-pushrm
-# docker pushrm $repo

@@ -38,7 +38,7 @@ $(function() {
 		}
 
 		form.render();
-	});	
+	});
 })
 
 
@@ -65,7 +65,7 @@ function showWindow(title) {
 	layer.open({
 		type: 1,
 		title: title,
-		area: ['1000px', '600px'], // 宽高
+		area: ['1200px', '600px'], // 宽高
 		content: $('#windowDiv')
 	});
 }
@@ -107,6 +107,7 @@ function addOver() {
 	$(".itemList").children().each(function() {
 
 		var upstreamServer = {};
+		upstreamServer.enable = $(this).find("input[name='enable']").prop("checked") ? 1 : 0;
 		upstreamServer.server = $(this).find("input[name='server']").val();
 		upstreamServer.port = $(this).find("input[name='port']").val();
 		upstreamServer.weight = $(this).find("input[name='weight']").val();
@@ -115,7 +116,7 @@ function addOver() {
 		upstreamServer.failTimeout = $(this).find("input[name='failTimeout']").val();
 		upstreamServer.status = $(this).find("select[name='status']").val();
 		upstreamServer.param = $(this).find("input[name='param']").val();
-		
+
 		upstreamServers.push(upstreamServer);
 	})
 
@@ -162,30 +163,37 @@ function edit(id,clone) {
 			if (data.success) {
 				var ext = data.obj;
 				var list = ext.upstreamServerList;
-				
+
 				if (!clone) {
 					$("#id").val(ext.upstream.id);
 				} else {
 					$("#id").val("");
 				}
-				
+
 				$("#name").val(ext.upstream.name);
 				$("#tactics").val(ext.upstream.tactics);
 				$("#proxyType").val(ext.upstream.proxyType);
-				
+
 				if(ext.upstream.proxyType == 0){
 					$("#tacticsDiv").show();
 				}else{
 					$("#tacticsDiv").hide();
 				}
-				
+
 				$("#upstreamParamJson").val(ext.paramJson);
 
 				var html = ``;
 				for (let i = 0; i < list.length; i++) {
 					var upstreamServer = list[i];
 					var uuid = guid();
+
+					var checked = upstreamServer.enable?"checked":"";
 					html += `<tr id='${uuid}'>
+									<td>
+										<div class="layui-inline" >
+											<input type="checkbox" name="enable" value="${upstreamServer.id}" lay-skin="switch" ${checked}>
+										</div>
+									</td>
 									<td><input type="text" name="server" class="layui-input" value="${upstreamServer.server}"></td>
 									<td><input type="number" name="port" class="layui-input" value="${upstreamServer.port}"></td>
 									<td><input type="number" name="weight" class="layui-input" value="${upstreamServer.weight}"></td>
@@ -284,6 +292,11 @@ function delMany() {
 function addItem() {
 	var uuid = guid();
 	var html = `<tr id='${uuid}'>
+						<td>
+							<div class="layui-inline" >
+								<input type="checkbox" name="enable" value="${uuid}" lay-skin="switch" checked>
+							</div>
+						</td>
 						<td><input type="text" name="server" class="layui-input"></td>
 						<td><input type="number" name="port" class="layui-input"></td>
 						<td><input type="number" name="weight" class="layui-input"></td>
@@ -323,6 +336,7 @@ function fillTable(params) {
 	var html = "";
 	for (var i = 0; i < params.length; i++) {
 		var param = params[i];
+		var position = param.position || 0;
 
 		var uuid = guid();
 
@@ -332,25 +346,36 @@ function fillTable(params) {
 				<td>
 					<textarea  name="name" class="layui-textarea">${param.name}</textarea>
 				</td>
-				<td  style="width: 50%;">
+				<td  style="width: 40%;">
 					<textarea  name="value" class="layui-textarea">${param.value}</textarea>
 				</td>
+				<td style="width: 100px;">
+					<select name="position" style="height: 30px;">
+						<option value="0" ${position == 0 ? 'selected' : ''}>${serverStr.paramAppend}</option>
+						<option value="1" ${position == 1 ? 'selected' : ''}>${serverStr.paramPrepend}</option>
+					</select>
+				</td>
 				<td>
+					<div class="layui-inline">
 					<button type="button" class="layui-btn layui-btn-sm layui-btn-danger" onclick="delTr('${uuid}')">${commonStr.del}</button>
-					
-					<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', -1)">${commonStr.up}</button>
-					<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', 1)">${commonStr.down}</button>
+					</div>
+					<div class="layui-inline">
+					<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', -1)">${commonStr.up}</button>
+					</div>
+					<div class="layui-inline">
+					<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', 1)">${commonStr.down}</button>
+					</div>
 				</td>
 			</tr>
 			`;
 		} else {
-			html +=  buildTemplateParam(uuid,param);
+			html +=  buildTemplateParam(uuid, param, true);
 		}
-	
+
 	}
 
 	$("#paramList").html(html);
-
+	form.render();
 	paramIndex = layer.open({
 		type: 1,
 		title: upstreamStr.extParam,
@@ -367,20 +392,32 @@ function addParam() {
 		<td>
 			<textarea  name="name" class="layui-textarea"></textarea>
 		</td>
-		<td  style="width: 50%;">
+		<td  style="width: 40%;">
 			<textarea  name="value" class="layui-textarea"></textarea>
 		</td>
+		<td style="width: 100px;">
+			<select name="position" style="height: 30px;">
+				<option value="0" selected>${serverStr.paramAppend}</option>
+				<option value="1">${serverStr.paramPrepend}</option>
+			</select>
+		</td>
 		<td>
-			<button type="button" class="layui-btn layui-btn-sm layui-btn-danger" onclick="delTr('${uuid}')">${commonStr.del}</button>
-			
-			<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', -1)">${commonStr.up}</button>
-			<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', 1)">${commonStr.down}</button>
+			<div class="layui-inline">
+				<button type="button" class="layui-btn layui-btn-sm layui-btn-danger" onclick="delTr('${uuid}')">${commonStr.del}</button>
+			</div>
+			<div class="layui-inline">
+				<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', -1)">${commonStr.up}</button>
+			</div>
+			<div class="layui-inline">
+				<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', 1)">${commonStr.down}</button>
+			</div>
 		</td>
 	</tr>
 	`;
 
 	$("#paramList").append(html);
-
+	
+	form.render();
 }
 
 
@@ -392,9 +429,11 @@ function addParamOver() {
 		if ($(this).find("input[name='templateValue']").val() == null) {
 			param.name = $(this).find("textarea[name='name']").val();
 			param.value = $(this).find("textarea[name='value']").val();
+			param.position = parseInt($(this).find("select[name='position']").val()) || 0;
 		} else {
 			param.templateValue = $(this).find("input[name='templateValue']").val();
 			param.templateName = $(this).find("input[name='templateName']").val();
+			param.position = parseInt($(this).find("select[name='position']").val()) || 0;
 		}
 		params.push(param);
 	})
@@ -441,8 +480,8 @@ function upstreamOver() {
 	//	layer.alert(remoteStr.emailTips);
 	//	return;
 	//}
-	
-	loadIndex = layer.load();
+
+	showLoad();
 	$.ajax({
 		type: 'POST',
 		url: ctx + '/adminPage/upstream/upstreamOver',
@@ -452,7 +491,7 @@ function upstreamOver() {
 		},
 		dataType: 'json',
 		success: function(data) {
-			layer.close(loadIndex);
+			closeLoad();
 			if (data.success) {
 				location.reload();
 			} else {
@@ -460,7 +499,7 @@ function upstreamOver() {
 			}
 		},
 		error: function() {
-			layer.close(loadIndex);
+			closeLoad();
 			layer.alert(commonStr.errorInfo);
 		}
 	});
@@ -474,7 +513,7 @@ function testMail() {
 			return;
 		}
 
-		loadIndex = layer.load();
+		showLoad();
 		$.ajax({
 			type: 'POST',
 			url: ctx + '/adminPage/admin/testMail',
@@ -483,7 +522,7 @@ function testMail() {
 			},
 			dataType: 'json',
 			success: function(data) {
-				layer.close(loadIndex);
+				closeLoad();
 				if (data.success) {
 					layer.msg(remoteStr.sendSuccess);
 				} else {
@@ -491,7 +530,7 @@ function testMail() {
 				}
 			},
 			error: function() {
-				layer.close(loadIndex);
+				closeLoad();
 				layer.alert(commonStr.errorInfo);
 			}
 		});
@@ -513,9 +552,9 @@ function addBatch(){
 
 function addBatchOver(){
 	var batchIp = $("#batchIp").val();
-	
+
 	var list = batchIp.split(",");
-	
+
 	var html = ``;
 	for (let i = 0; i < list.length; i++) {
 		var ip = list[i].split(":")[0];
@@ -582,14 +621,14 @@ function editDescr(id){
 			if (data.success) {
 				$("#upstreamId").val(id);
 				$("#descr").val(data.obj!=null?data.obj:'');
-				
+
 				layer.open({
 					type: 1,
 					title: upstreamStr.descr,
 					area: ['500px', '360px'], // 宽高
 					content: $('#descrDiv')
 				});
-				
+
 			} else {
 				layer.msg(data.msg)
 			}

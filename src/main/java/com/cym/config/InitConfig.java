@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import org.noear.solon.annotation.Component;
@@ -31,13 +30,13 @@ import com.cym.sqlhelper.utils.JdbcTemplate;
 import com.cym.sqlhelper.utils.SqlHelper;
 import com.cym.utils.EncodePassUtils;
 import com.cym.utils.MessageUtils;
-import com.cym.utils.NginxUtils;
 import com.cym.utils.SystemTool;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.RandomUtil;
@@ -76,12 +75,15 @@ public class InitConfig {
 	@Inject("${spring.database.type}")
 	String databaseType;
 
+	@Inject("${init.admin}")
+	String initAdmin;
+	@Inject("${init.pass}")
+	String initPass;
+	@Inject("${init.api}")
+	Boolean initApi;
+
 	@Init
 	public void start() throws Throwable {
-		// h2转sqlite
-		if ((databaseType.equalsIgnoreCase("sqlite") || databaseType.equalsIgnoreCase("h2")) && FileUtil.exist(homeConfig.home + "h2.mv.db")) {
-			transferSql();
-		}
 
 		// 找回密码
 		if (findPass) {
@@ -89,12 +91,18 @@ public class InitConfig {
 			for (Admin admin : admins) {
 				String randomPass = RandomUtil.randomString(8);
 				
-				System.out.println(m.get("adminStr.name") + ":" + admin.getName() + " " + m.get("adminStr.pass") + ":" + randomPass);
 				admin.setAuth(false); // 关闭二次验证
 				admin.setPass(EncodePassUtils.encode(randomPass));
 				sqlHelper.updateById(admin);
+				
+				System.out.println(m.get("adminStr.name") + ":" + admin.getName() + " " + m.get("adminStr.pass") + ":" + randomPass);
 			}
 			System.exit(1);
+		}
+
+		// 初始化管理员账号
+		if (StrUtil.isNotBlank(initAdmin) && StrUtil.isNotBlank(initPass)) {
+			addAdmin();
 		}
 
 		// 初始化base值
@@ -163,24 +171,35 @@ public class InitConfig {
 				settingService.set("nginxExe", "nginx");
 			}
 
-			// 尝试启动nginx
-			String nginxExe = settingService.get("nginxExe");
-			String nginxDir = settingService.get("nginxDir");
+			// 异步重启nginx, 重建pid
+			ThreadUtil.execute(new Runnable() {
 
-			logger.info("nginxIsRun:" + NginxUtils.isRun());
-			if (!NginxUtils.isRun() && StrUtil.isNotEmpty(nginxExe) && StrUtil.isNotEmpty(nginxPath)) {
-				String cmd = nginxExe + " -c " + nginxPath;
+				@Override
+				public void run() {
 
-				if (StrUtil.isNotEmpty(nginxDir)) {
-					cmd += " -p " + nginxDir;
+					String nginxExe = settingService.get("nginxExe");
+					String nginxDir = settingService.get("nginxDir");
+					String nginxPath = settingService.get("nginxPath");
+					if (StrUtil.isNotEmpty(nginxExe) && StrUtil.isNotEmpty(nginxPath)) {
+						runCmd("pkill -9 nginx");
+						String cmd = nginxExe + " -c " + nginxPath;
+						if (StrUtil.isNotEmpty(nginxDir)) {
+							cmd += " -p " + nginxDir;
+						}
+						runCmd(cmd);
+					}
 				}
-				logger.info("runCmd:" + cmd);
-				RuntimeUtil.execForStr("/bin/sh", "-c", cmd);
-			}
+
+			});
 		}
 
 		// 展示logo
 		showLogo();
+	}
+
+	private void runCmd(String cmd) {
+		logger.info("run: " + cmd);
+		RuntimeUtil.execForStr("/bin/sh", "-c", cmd);
 	}
 
 	private boolean hasNginx() {
@@ -209,6 +228,7 @@ public class InitConfig {
 
 	}
 
+	@Deprecated
 	private void transferSql() {
 		// 关闭sqlite连接
 		dataSourceEmbed.getDataSource().close();
@@ -244,7 +264,7 @@ public class InitConfig {
 			Table table = clazz.getAnnotation(Table.class);
 			if (table != null) {
 				try {
-					List<Map<String, Object>> list = jdbcTemplate.queryForList("SELECT * FROM `" + StrUtil.toUnderlineCase(clazz.getSimpleName()) + "`");
+					List<Map<String, Object>> list = jdbcTemplate.queryForList("SELECT * FROM " + SQLConstants.SUFFIX + StrUtil.toUnderlineCase(clazz.getSimpleName()) + SQLConstants.SUFFIX);
 
 					map.put(clazz.getName(), sqlHelper.buildObjects(list, clazz));
 				} catch (Exception e) {
@@ -268,4 +288,19 @@ public class InitConfig {
 		}
 	}
 
+	private void addAdmin() {
+		Long adminCount = sqlHelper.findAllCount(Admin.class);
+		if (adminCount > 0) {
+			return;
+		}
+
+		Admin admin = new Admin();
+		admin.setName(initAdmin);
+		admin.setPass(EncodePassUtils.encode(initPass));
+		admin.setApi(initApi);
+		admin.setType(0);
+
+		sqlHelper.insert(admin);
+
+	}
 }

@@ -24,9 +24,9 @@ Video course: https://www.bilibili.com/video/BV18A4y1D7GZ
 
 #### Technical note
 
-This project is a Web system based on solon. The database use h2, so there is no need to install any database on the server.
+This project is a Web system based on solon. The database use SQLite, so there is no need to install any database on the server.
 
-This system applies for the certificate through Let's ENCRYPT and USES acme.sh script to automatically apply for and renew the certificate. Once the certificate is renewed, it will be renewed at 2 am every day, and only certificates exceeding 60 days will be renewed.
+This system applies for the certificate through Let's ENCRYPT and USES acme.sh script to automatically apply for and renew the certificate. Certificates with automatic renewal enabled are checked every two hours, and only certificates issued more than 60 days ago will be renewed.
 
 When adding TCP/IP forwarding configuration support, some lower versions of Nginx may need to be recompiled,You can install the stream module by adding the -with-stream parameter, but under Ubuntu 18.04, the nginx in the official software library already has the stream module, which does not need to be recompiled. If the TCP forwarding item is configured in this system, the configuration item of ngx_stream_module.so will be introduced automatically, and the configuration file of Ngnix will be optimized to the maximum.
 
@@ -62,13 +62,19 @@ Path : JDK installation directory\bin
 reboot
 ```
 
-2.Download the latest release of the distribution jar
+2. Build this project and copy its jar
 
+```bash
+mvn clean package
+mkdir -p /data/nginxwebui/
+cp target/nginxwebui-4.4.3.jar /data/nginxwebui/nginxwebui.jar
 ```
-Linux: mkdir /data/nginxwebui/   
-       wget -O /data/nginxwebui/nginxwebui.jar http://file.nginxwebui.cn/nginxwebui-4.2.4.jar
 
-Windows: Download directly from your browser http://file.nginxwebui.cn/nginxwebui-4.2.4.jar into D:/data/nginxwebui/
+On Windows, copy `target/nginxwebui-4.4.3.jar` to `D:/data/nginxwebui/nginxwebui.jar`. Use the jar built from this project to retain local customizations.
+
+3.jar
+
+Windows: Download directly from your browser https://gitee.com/cym1102/nginxWebUI/releases/download/4.4.3/nginxWebUI-4.4.3.jar into D:/data/nginxwebui/
 ```
 
 With a new version, you just need to change the version in the path
@@ -87,13 +93,19 @@ Parameter description (both non-required)
 
 --project.home Project profile directory for database files, certificate files, logs, etc. Default is /data/nginxwebui/
 
---spring.database.type=mysql Use other databases, not filled with native h2, options include mysql
+--spring.database.type=mysql Use other databases, not filled with native sqlite, options include mysql postgresql
 
 --spring.datasource.url=jdbc:mysql://ip:port/nginxwebui Databases url
 
 --spring.datasource.username=root  Databases user
 
 --spring.datasource.password=pass  Databases password
+
+--init.admin=admin  Initial user name
+
+--init.pass=admin  Initial user password
+
+--init.api=true  Initial user enables the api permission
 
 Note that the Linux command ends with an & to indicate that the project is running in the background
 
@@ -199,7 +211,7 @@ Restart=always
 WantedBy=multi-user.target
 ```
 
-Then execute
+2. Then execute
 
 ```
 systemctl daemon-reload

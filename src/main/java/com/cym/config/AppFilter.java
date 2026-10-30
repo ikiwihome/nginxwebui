@@ -1,17 +1,11 @@
 package com.cym.config;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -19,10 +13,13 @@ import java.util.Set;
 
 import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Inject;
+import org.noear.solon.core.exception.StatusException;
 import org.noear.solon.core.handle.Context;
 import org.noear.solon.core.handle.Filter;
 import org.noear.solon.core.handle.FilterChain;
 import org.noear.solon.core.handle.UploadedFile;
+import org.noear.solon.core.util.KeyValues;
+import org.noear.solon.core.util.MultiMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,12 +35,10 @@ import com.cym.utils.MessageUtils;
 import com.cym.utils.PropertiesUtils;
 
 import cn.hutool.core.codec.Base64;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 
 @Component
@@ -66,9 +61,25 @@ public class AppFilter implements Filter {
 	@Inject
 	SettingService settingService;
 
+
 	@Override
 	public void doFilter(Context ctx, FilterChain chain) throws Throwable {
+		// todo: 原异常处理改为正常的上抛了
+		try {
+			doFilterDo(ctx, chain);
+		} catch (StatusException e) {
+			// 4xx 相关状态异常
+			ctx.status(e.getCode());
 
+			if (404 != e.getCode()) {
+				logger.error(e.getMessage(), e);
+			}
+		} catch (Throwable e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	private void doFilterDo(Context ctx, FilterChain chain) throws Throwable {
 		String path = ctx.path().toLowerCase();
 
 		// 全局过滤器
@@ -107,6 +118,30 @@ public class AppFilter implements Filter {
 			}
 		}
 
+		// 分页保存过滤
+		if (StrUtil.isNotEmpty(ctx.param("limit"))) {
+			ctx.sessionSet("limit", ctx.param("limit"));
+		}
+
+		// 管理员过滤器
+		if (path.toLowerCase().contains("/adminPage/admin".toLowerCase())) {
+			Admin admin = (Admin) ctx.session("admin");
+			String showAdmin = ctx.param("showAdmin");
+
+			if (admin.getType() != 0 && !"true".equals(showAdmin)) {
+				JsonResult result = new JsonResult();
+				result.setSuccess(false);
+				result.setStatus("401");
+				result.setMsg(m.get("loginStr.notPermission"));
+
+				ctx.output(JSONUtil.toJsonPrettyStr(result));
+
+				// 设置为已处理
+				ctx.setHandled(true);
+				return;
+			}
+		}
+
 		chain.doFilter(ctx);
 
 	}
@@ -134,6 +169,12 @@ public class AppFilter implements Filter {
 		String ctxStr = getCtxStr(ctx);
 
 		if (ctx.path().toLowerCase().contains("adminPage/login".toLowerCase())) {
+			return true;
+		}
+		if (ctx.path().toLowerCase().contains("adminPage/sso/code".toLowerCase())) {
+			return true;
+		}
+        if (ctx.path().toLowerCase().contains("adminPage/sso/redirect".toLowerCase())) {
 			return true;
 		}
 
@@ -174,7 +215,8 @@ public class AppFilter implements Filter {
 				} else {
 					// 普通请求
 					Admin admin = new BaseController().getAdmin();
-					String body = buldBody(ctx.paramsMap(), remote, admin);
+					// todo: ctx.paramsMap() 已取消，复用 ctx.paramMap()
+					String body = buldBody(ctx.paramMap(), remote, admin);
 
 					httpResponse = HttpRequest.post(url).body(body).execute();
 				}
@@ -277,18 +319,16 @@ public class AppFilter implements Filter {
 
 	}
 
-	private String buldBody(Map<String, List<String>> parameterMap, Remote remote, Admin admin) throws UnsupportedEncodingException {
+	private String buldBody(MultiMap<String> parameterMap, Remote remote, Admin admin) throws UnsupportedEncodingException {
 		List<String> body = new ArrayList<>();
 		body.add("creditKey=" + remote.getCreditKey());
 		if (admin != null) {
 			body.add("adminName=" + admin.getName());
 		}
 
-		for (Iterator itr = parameterMap.entrySet().iterator(); itr.hasNext();) {
-			Map.Entry me = (Map.Entry) itr.next();
-
-			for (String value : (List<String>) me.getValue()) {
-				body.add(me.getKey() + "=" + URLEncoder.encode(value, "UTF-8"));
+		for (KeyValues<String> kv : parameterMap) {
+			for (String value : kv.getValues()) {
+				body.add(kv.getKey() + "=" + URLEncoder.encode(value, "UTF-8"));
 			}
 
 		}

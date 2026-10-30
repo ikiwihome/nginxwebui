@@ -6,7 +6,7 @@
     <meta name="generator" content="smart-doc">
     <title>nginxwebui</title>
     <link rel="stylesheet" href="font.css">
-    <link rel="stylesheet" href="AllInOne.css?v=1718078016506"/>
+    <link rel="stylesheet" href="AllInOne.css?v=1750921063368"/>
     
     <style>.literalblock pre, .listingblock pre:not(.highlight), .listingblock pre[class="highlight"], .listingblock pre[class^="highlight "], .listingblock pre.CodeRay, .listingblock pre.prettyprint {
         background: #f7f7f8;
@@ -234,6 +234,37 @@
                     </li>
                 </ul>
             </li>
+            <li class=""><a class="dd" href="WwwApiController.html#header">11.&nbsp;静态网页接口</a>
+                <ul class="sectlevel2" style="display: none">
+                    <li><a
+                            href="WwwApiController.html#_11_1_获取静态网页分页列表">11.1.&nbsp;获取静态网页分页列表</a>
+                    </li>
+
+                    <li><a
+                            href="WwwApiController.html#_11_2_添加或编辑静态网页">11.2.&nbsp;添加或编辑静态网页</a>
+                    </li>
+
+                    <li><a
+                            href="WwwApiController.html#_11_3_清空静态网页路径">11.3.&nbsp;清空静态网页路径</a>
+                    </li>
+
+                    <li><a
+                            href="WwwApiController.html#_11_4_删除静态网页">11.4.&nbsp;删除静态网页</a>
+                    </li>
+
+                    <li><a
+                            href="WwwApiController.html#_11_5_静态网页详情">11.5.&nbsp;静态网页详情</a>
+                    </li>
+
+                    <li><a
+                            href="WwwApiController.html#_11_6_获取静态网页描述">11.6.&nbsp;获取静态网页描述</a>
+                    </li>
+
+                    <li><a
+                            href="WwwApiController.html#_11_7_编辑静态网页描述">11.7.&nbsp;编辑静态网页描述</a>
+                    </li>
+                </ul>
+            </li>
         </ul>
     </div>
 </div>
@@ -412,6 +443,9 @@
         "aliSecret": "",
         "cfEmail": "",
         "cfKey": "",
+        "cfToken": "",
+        "cfAccountId": "",
+        "cfZoneId": "",
         "gdKey": "",
         "gdSecret": "",
         "hwUsername": "",
@@ -531,7 +565,7 @@
                     <tr>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">dnsType</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">dns提供商 ali:阿里云 dp:dnsPod cf:Cloudflare gd:Godaddy hw:华为云 tencent:腾讯云 aws:亚马逊云<br>ipv64:IPv64</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">dns提供商 ali:阿里云 dp:dnsPod cf:Cloudflare_Global cfToken:Cloudflare_Token gd:Godaddy hw:华为云 tencent:腾讯云 aws:亚马逊云<br>ipv64:IPv64</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
                     </tr>
@@ -587,7 +621,7 @@
                     <tr>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">cfEmail</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">cfEmail(Cloudflare需要的参数)</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">cfEmail(Cloudflare Global需要的参数)</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
                     </tr>
@@ -595,7 +629,31 @@
                     <tr>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">cfKey</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">cfKey(Cloudflare需要的参数)</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">cfKey(Cloudflare Global需要的参数)</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                    </tr>
+
+                    <tr>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">cfToken</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">cfToken(Cloudflare Token需要的参数)</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                    </tr>
+
+                    <tr>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">cfAccountId</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">cfAccountId(Cloudflare Token需要的参数)</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                    </tr>
+
+                    <tr>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">cfZoneId</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">cfZoneId(Cloudflare Token需要的参数)</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
                     </tr>
@@ -668,7 +726,7 @@
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /api/cert/addOver?type=0&makeTime=0&endTime=0&autoRenew=0&aliKey=&dpKey=&encryption=&cfEmail=&pem=&hwPassword=&tencentSecretKey=&tencentSecretId=&dnsType=&key=&gdSecret=&cfKey=&dpId=&gdKey=&aliSecret=&domain=&id=&ipv64Token=&awsSecretAccessKey=&hwUsername=&hwDomainName=&awsAccessKeyId=</code></pre>
+                        <pre><code class="bash">curl -X GET -i /api/cert/addOver?type=0&makeTime=0&endTime=0&autoRenew=0&aliKey=&dpId=&ipv64Token=&cfKey=&id=&awsAccessKeyId=&encryption=&tencentSecretKey=&gdKey=&domain=&cfZoneId=&awsSecretAccessKey=&gdSecret=&hwDomainName=&hwUsername=&key=&dnsType=&dpKey=&pem=&tencentSecretId=&cfToken=&hwPassword=&cfEmail=&aliSecret=&cfAccountId=</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-fields:</strong></p></div>
@@ -1092,7 +1150,7 @@
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /api/cert/apply?id=&type=</code></pre>
+                        <pre><code class="bash">curl -X GET -i /api/cert/apply?type=&id=</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-fields:</strong></p></div>
@@ -1258,30 +1316,72 @@
                     </thead>
                     <tbody>
                     <tr>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">content</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">object</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">No comments found.</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                    </tr>
+
+                    <tr>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">contentType</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">内容类型（有些地方会动态构建，所以不能只读）</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">No comments found.</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
                     </tr>
 
                     <tr>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">contentSize</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">int64</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">内容大小</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">content</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">object</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">内容流</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">No comments found.</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
                     </tr>
 
                     <tr>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">文件名（带扩展名，例：demo.jpg）</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">No comments found.</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                    </tr>
+
+                    <tr>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">attachment</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">No comments found.</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                    </tr>
+
+                    <tr>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">maxAgeSeconds</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">int32</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">No comments found.</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                    </tr>
+
+                    <tr>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">eTag</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">No comments found.</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                    </tr>
+
+                    <tr>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">lastModified</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">No comments found.</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                    </tr>
+
+                    <tr>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">file</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">object</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">No comments found.</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                    </tr>
+
+                    <tr>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">└─path</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">No comments found.</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
                     </tr>
                     </tbody>
@@ -1295,12 +1395,12 @@
             </div>
         </div>
     </div>
-    <footer class="page-footer"><span class="copyright">Generated by smart-doc at 2024-06-11 11:53:36</span><span
+    <footer class="page-footer"><span class="copyright">Generated by smart-doc at 2025-06-26 14:57:43</span><span
             class="footer-modification">Suggestions,contact,support and error reporting on<a
             href="https://gitee.com/smart-doc-team/smart-doc" target="_blank">&nbsp;Gitee</a>&nbsp;or<a
             href="https://github.com/smart-doc-group/smart-doc.git" target="_blank">&nbsp;Github</a></span></footer>
 </div>
-<script src="search.js?v=1718078016506"></script>
+<script src="search.js?v=1750921063368"></script>
 <script>
     $(function () {
         const Accordion = function (el, multiple) {
